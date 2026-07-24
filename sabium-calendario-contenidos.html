@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sabium · Calendario de Contenidos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Chettan+2:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1C2B4A;
+    --navy-2:#28395c;
+    --teal:#4DBDB5;
+    --teal-soft:#DCF3F1;
+    --salmon:#E8837A;
+    --salmon-soft:#FBE4E1;
+    --bg:#F4F6F9;
+    --card:#FFFFFF;
+    --text:#1C2B4A;
+    --muted:#7B849A;
+    --border:#E4E8F0;
+    --ig:#C13584;
+    --li:#0A66C2;
+    --fb:#1877F2;
+    --wa:#25D366;
+    --other:#8B93A7;
+    --radius:14px;
+    --font-display:'Baloo Chettan 2','Poppins',sans-serif;
+    --font-body:'Poppins','Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:#c9d0dd;border-radius:8px;}
+
+  /* ---------- header ---------- */
+  .app-header{
+    position:sticky;top:0;z-index:20;
+    background:linear-gradient(135deg,var(--navy),var(--navy-2));
+    color:#fff;padding:16px 22px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  .brand{display:flex;flex-direction:column;line-height:1.1;}
+  .brand .name{font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:.3px;}
+  .brand .tag{font-size:11.5px;color:#B9C4DA;font-weight:400;margin-top:2px;}
+
+  .month-nav{display:flex;align-items:center;gap:10px;}
+  .nav-btn{background:rgba(255,255,255,.12);border:none;color:#fff;width:32px;height:32px;border-radius:50%;
+    font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+  .nav-btn:hover{background:rgba(255,255,255,.24);}
+  .month-label{font-family:var(--font-display);font-size:19px;font-weight:600;min-width:170px;text-align:center;}
+  .today-btn{background:rgba(77,189,181,.22);border:1px solid var(--teal);color:#fff;padding:6px 13px;border-radius:20px;
+    font-size:12.5px;font-family:var(--font-body);font-weight:600;cursor:pointer;}
+  .today-btn:hover{background:var(--teal);color:var(--navy);}
+
+  .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .name-field{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:20px;
+    padding:6px 12px;color:#fff;font-size:12.5px;font-family:var(--font-body);width:130px;}
+  .name-field::placeholder{color:#B9C4DA;}
+  .icon-btn{background:rgba(255,255,255,.12);border:none;color:#fff;width:32px;height:32px;border-radius:50%;
+    cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+  .icon-btn:hover{background:rgba(255,255,255,.24);}
+  .btn-primary{background:var(--salmon);color:#fff;border:none;padding:9px 16px;border-radius:20px;font-family:var(--font-body);
+    font-weight:600;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(232,131,122,.35);white-space:nowrap;}
+  .btn-primary:hover{background:#df6d63;}
+
+  /* ---------- filters ---------- */
+  .filter-bar{display:flex;gap:8px;align-items:center;padding:14px 22px 0;flex-wrap:wrap;}
+  .chip{border:1.5px solid var(--border);background:var(--card);padding:6px 13px;border-radius:20px;font-size:12.5px;
+    font-weight:600;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:6px;transition:all .15s;}
+  .chip .dot{width:8px;height:8px;border-radius:50%;}
+  .chip.active{border-color:transparent;color:#fff;}
+  .chip[data-p="all"].active{background:var(--navy);}
+  .chip[data-p="instagram"].active{background:var(--ig);}
+  .chip[data-p="linkedin"].active{background:var(--li);}
+  .chip[data-p="facebook"].active{background:var(--fb);}
+  .chip[data-p="whatsapp"].active{background:var(--wa);}
+  .chip[data-p="otro"].active{background:var(--other);}
+
+  /* ---------- calendar ---------- */
+  .calendar-wrap{padding:14px 22px 30px;max-width:1180px;margin:0 auto;}
+  .weekday-header{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:8px;}
+  .weekday-header span{text-align:center;font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;}
+  .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+  .day-cell{background:var(--card);border:1.5px solid var(--border);border-radius:12px;min-height:112px;max-height:170px;
+    padding:7px;display:flex;flex-direction:column;gap:4px;position:relative;overflow-y:auto;transition:border-color .15s,background .15s;}
+  .day-cell.other-month{opacity:.42;}
+  .day-cell.today{border-color:var(--teal);box-shadow:0 0 0 2px rgba(77,189,181,.2) inset;}
+  .day-cell.drag-over{border-color:var(--salmon);background:var(--salmon-soft);}
+  .day-top{display:flex;align-items:center;justify-content:space-between;}
+  .day-number{font-family:var(--font-display);font-weight:600;font-size:13.5px;width:23px;height:23px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .day-cell.today .day-number{background:var(--navy);color:#fff;}
+  .add-day-btn{opacity:0;background:var(--teal-soft);color:var(--navy);border:none;width:19px;height:19px;border-radius:50%;
+    cursor:pointer;font-size:13px;line-height:1;transition:opacity .15s;}
+  .day-cell:hover .add-day-btn{opacity:1;}
+  @media (hover:none){.add-day-btn{opacity:1;}}
+
+  .pill{background:#fff;border:1px solid var(--border);border-left:4px solid var(--other);border-radius:7px;
+    padding:4px 6px;font-size:10.8px;cursor:grab;box-shadow:0 1px 2px rgba(28,43,74,.06);display:flex;align-items:center;gap:5px;}
+  .pill:active{cursor:grabbing;}
+  .pill[data-platform="instagram"]{border-left-color:var(--ig);}
+  .pill[data-platform="linkedin"]{border-left-color:var(--li);}
+  .pill[data-platform="facebook"]{border-left-color:var(--fb);}
+  .pill[data-platform="whatsapp"]{border-left-color:var(--wa);}
+  .pill[data-platform="otro"]{border-left-color:var(--other);}
+  .pill .p-badge{font-weight:700;font-size:8.5px;padding:1px 4px;border-radius:4px;color:#fff;flex-shrink:0;}
+  .p-badge.instagram{background:var(--ig);} .p-badge.linkedin{background:var(--li);}
+  .p-badge.facebook{background:var(--fb);} .p-badge.whatsapp{background:var(--wa);} .p-badge.otro{background:var(--other);}
+  .pill .p-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-weight:500;}
+  .pill .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .status-dot.borrador{background:transparent;border:1.5px solid var(--muted);}
+  .status-dot.listo{background:var(--teal);}
+  .status-dot.publicado{background:var(--navy);}
+
+  .month-footer{padding:8px 4px 0;font-size:12.5px;color:var(--muted);}
+
+  /* ---------- modal ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(28,43,74,.55);display:none;align-items:center;justify-content:center;
+    z-index:100;padding:16px;}
+  .overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;
+    box-shadow:0 20px 50px rgba(28,43,74,.3);}
+  .modal h2{font-family:var(--font-display);font-size:19px;margin:0 0 16px;color:var(--navy);}
+  .field{margin-bottom:13px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;}
+  .field input[type=text], .field input[type=date], .field select, .field textarea{
+    width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 11px;font-family:var(--font-body);
+    font-size:13.5px;color:var(--text);background:#fbfcfe;}
+  .field textarea{resize:vertical;min-height:60px;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--teal);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .modal-actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;}
+  .btn-save{background:var(--salmon);color:#fff;border:none;padding:10px 20px;border-radius:20px;font-weight:600;
+    font-size:13.5px;cursor:pointer;}
+  .btn-save:hover{background:#df6d63;}
+  .btn-cancel{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-weight:600;}
+  .btn-delete{background:none;border:none;color:#c0554d;font-size:12.5px;cursor:pointer;font-weight:600;}
+
+  .comments-section{margin-top:20px;border-top:1px solid var(--border);padding-top:16px;}
+  .comments-section h3{font-family:var(--font-display);font-size:14.5px;color:var(--navy);margin:0 0 10px;}
+  .comment{display:flex;gap:9px;margin-bottom:12px;}
+  .avatar{width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-size:11px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .comment-body .c-head{font-size:12px;font-weight:700;color:var(--navy);}
+  .comment-body .c-time{font-size:10.5px;color:var(--muted);font-weight:400;margin-left:6px;}
+  .comment-body .c-text{font-size:12.8px;color:var(--text);margin-top:2px;line-height:1.4;}
+  .no-comments{font-size:12.5px;color:var(--muted);font-style:italic;}
+  .new-comment{display:flex;gap:7px;margin-top:12px;}
+  .new-comment textarea{flex:1;min-height:38px;border:1.5px solid var(--border);border-radius:9px;padding:8px 10px;
+    font-family:var(--font-body);font-size:12.8px;resize:none;}
+  .new-comment button{background:var(--teal);border:none;color:#fff;border-radius:9px;padding:0 14px;font-weight:600;
+    font-size:12px;cursor:pointer;}
+
+  /* help modal */
+  .help-list{font-size:13px;line-height:1.6;color:var(--text);padding-left:18px;margin:0;}
+  .help-list li{margin-bottom:8px;}
+
+  /* toast */
+  .toast{position:fixed;bottom:20px;right:20px;background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;
+    font-size:13px;box-shadow:0 8px 24px rgba(28,43,74,.3);opacity:0;transform:translateY(8px);transition:all .25s;z-index:200;}
+  .toast.show{opacity:1;transform:translateY(0);}
+
+  @media (max-width:720px){
+    .app-header{padding:13px 14px;}
+    .brand .name{font-size:19px;}
+    .month-label{min-width:140px;font-size:16px;}
+    .filter-bar{padding:12px 14px 0;}
+    .calendar-wrap{padding:12px 8px 24px;}
+    .day-cell{min-height:70px;padding:5px;}
+    .day-number{width:20px;height:20px;font-size:11.5px;}
+    .pill{font-size:9.5px;padding:3px 4px;}
+    .pill .p-badge{display:none;}
+    .name-field{width:96px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="brand">
+    <span class="name">Sabium</span>
+    <span class="tag">Calendario de contenidos · Tus aulas, a un clic</span>
+  </div>
+
+  <div class="month-nav">
+    <button class="nav-btn" id="prevMonth">‹</button>
+    <span class="month-label" id="monthLabel">—</span>
+    <button class="nav-btn" id="nextMonth">›</button>
+    <button class="today-btn" id="goToday">Hoy</button>
+  </div>
+
+  <div class="header-right">
+    <input type="text" class="name-field" id="userNameField" placeholder="Tu nombre">
+    <button class="icon-btn" id="refreshBtn" title="Actualizar">⟳</button>
+    <button class="icon-btn" id="helpBtn" title="Cómo compartir">?</button>
+    <button class="btn-primary" id="newContentBtn">+ Nuevo contenido</button>
+  </div>
+</div>
+
+<div class="filter-bar" id="filterBar">
+  <div class="chip active" data-p="all"><span class="dot" style="background:var(--navy)"></span>Todas</div>
+  <div class="chip" data-p="instagram"><span class="dot" style="background:var(--ig)"></span>Instagram</div>
+  <div class="chip" data-p="linkedin"><span class="dot" style="background:var(--li)"></span>LinkedIn</div>
+  <div class="chip" data-p="facebook"><span class="dot" style="background:var(--fb)"></span>Facebook</div>
+  <div class="chip" data-p="whatsapp"><span class="dot" style="background:var(--wa)"></span>WhatsApp</div>
+  <div class="chip" data-p="otro"><span class="dot" style="background:var(--other)"></span>Otro</div>
+</div>
+
+<div class="calendar-wrap">
+  <div class="weekday-header">
+    <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+  </div>
+  <div class="calendar-grid" id="calendarGrid"></div>
+  <div class="month-footer" id="monthFooter"></div>
+</div>
+
+<!-- Add/Edit modal -->
+<div class="overlay" id="contentOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Nuevo contenido</h2>
+    <input type="hidden" id="fieldId">
+    <div class="row2">
+      <div class="field">
+        <label>Fecha</label>
+        <input type="date" id="fieldDate">
+      </div>
+      <div class="field">
+        <label>Plataforma</label>
+        <select id="fieldPlatform">
+          <option value="instagram">Instagram</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="facebook">Facebook</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Título / qué se publica</label>
+      <input type="text" id="fieldTitle" placeholder="Ej: Carrusel autoevaluación pre-digitalización">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Estado</label>
+        <select id="fieldStatus">
+          <option value="borrador">Borrador</option>
+          <option value="listo">Listo para publicar</option>
+          <option value="publicado">Publicado</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Responsable</label>
+        <input type="text" id="fieldOwner" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="field">
+      <label>Notas</label>
+      <textarea id="fieldNotes" placeholder="Copy, link al archivo, detalles..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-delete" id="deleteBtn" style="display:none;">Eliminar</button>
+      <div style="display:flex;gap:14px;align-items:center;margin-left:auto;">
+        <button class="btn-cancel" id="cancelBtn">Cancelar</button>
+        <button class="btn-save" id="saveBtn">Guardar</button>
+      </div>
+    </div>
+
+    <div class="comments-section" id="commentsSection" style="display:none;">
+      <h3>Comentarios</h3>
+      <div id="commentsList"></div>
+      <div class="new-comment">
+        <textarea id="newCommentText" placeholder="Dejar un comentario..."></textarea>
+        <button id="addCommentBtn">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Help modal -->
+<div class="overlay" id="helpOverlay">
+  <div class="modal" style="max-width:420px;">
+    <h2>Cómo compartir este calendario</h2>
+    <ul class="help-list">
+      <li>Esta app guarda los contenidos en un espacio <strong>compartido</strong>: cualquier persona que abra este mismo link va a poder ver, agregar, mover y comentar contenidos — no hace falta login.</li>
+      <li>Para que tu equipo lo vea, compartí el link de este mismo artifact (no le pidan a otro Claude que lo regenere: sería una copia separada, sin los datos que cargaste).</li>
+      <li>Los cambios de otras personas aparecen solos cada ~20 segundos, o tocá ⟳ para actualizar al toque.</li>
+      <li>En computadora podés arrastrar las tarjetas a otro día. En el celular, abrí la tarjeta y cambiá la fecha desde ahí.</li>
+      <li>El campo "Tu nombre" solo se usa para identificar quién creó o comentó cada contenido — se reinicia si recargás la página.</li>
+    </ul>
+    <div class="modal-actions">
+      <div style="margin-left:auto;">
+        <button class="btn-save" id="closeHelpBtn">Entendido</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'sabium_content_calendar_v1';
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+let items = [];
+const today = new Date();
+let viewedYear = today.getFullYear();
+let viewedMonth = today.getMonth();
+let userName = '';
+let activeFilter = 'all';
+let modalOpen = false;
+let currentEditId = null;
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,'0');
+const dateStr = (y,m,d) => `${y}-${pad(m+1)}-${pad(d)}`;
+const todayStr = dateStr(today.getFullYear(), today.getMonth(), today.getDate());
+
+function showToast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+function platformLabel(p){
+  return {instagram:'IG', linkedin:'LI', facebook:'FB', whatsapp:'WA', otro:'Otro'}[p] || p;
+}
+
+/* ---------------- storage ---------------- */
+async function readStoredItems(){
+  try{
+    if(window.storage && typeof window.storage.get === 'function'){
+      const res = await window.storage.get(STORAGE_KEY, true);
+      return res && res.value ? JSON.parse(res.value) : [];
+    }
+  }catch(e){}
+
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+async function writeStoredItems(value){
+  const serialized = JSON.stringify(value);
+
+  try{
+    if(window.storage && typeof window.storage.set === 'function'){
+      await window.storage.set(STORAGE_KEY, serialized, true);
+      return true;
+    }
+  }catch(e){}
+
+  try{
+    localStorage.setItem(STORAGE_KEY, serialized);
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+async function loadItems(silent){
+  try{
+    items = await readStoredItems();
+  }catch(e){
+    items = [];
+  }
+  renderCalendar();
+  if(!silent) {} 
+}
+
+async function persistMutation(mutateFn){
+  // best-effort re-read before writing, to reduce clobbering concurrent edits
+  try{
+    items = await readStoredItems();
+  }catch(e){ /* keep in-memory items */ }
+  mutateFn(items);
+  try{
+    const saved = await writeStoredItems(items);
+    if(!saved) throw new Error('storage write failed');
+  }catch(e){
+    showToast('No se pudo guardar. Probá de nuevo.');
+    return false;
+  }
+  renderCalendar();
+  return true;
+}
+
+/* ---------------- calendar rendering ---------------- */
+function renderCalendar(){
+  $('monthLabel').textContent = `${MONTHS[viewedMonth]} ${viewedYear}`;
+  const grid = $('calendarGrid');
+  grid.innerHTML = '';
+
+  const firstOfMonth = new Date(viewedYear, viewedMonth, 1);
+  const leading = (firstOfMonth.getDay() + 6) % 7; // Monday-first offset
+  const daysInMonth = new Date(viewedYear, viewedMonth+1, 0).getDate();
+  const daysInPrevMonth = new Date(viewedYear, viewedMonth, 0).getDate();
+  const totalCells = Math.ceil((leading + daysInMonth) / 7) * 7;
+
+  let monthCount = 0;
+
+  for(let i=0;i<totalCells;i++){
+    let cellDate, cellMonth, cellYear, otherMonth=false;
+    if(i < leading){
+      cellDate = daysInPrevMonth - leading + i + 1;
+      cellMonth = viewedMonth - 1; cellYear = viewedYear;
+      otherMonth = true;
+    } else if(i >= leading + daysInMonth){
+      cellDate = i - leading - daysInMonth + 1;
+      cellMonth = viewedMonth + 1; cellYear = viewedYear;
+      otherMonth = true;
+    } else {
+      cellDate = i - leading + 1;
+      cellMonth = viewedMonth; cellYear = viewedYear;
+    }
+    let normM = cellMonth, normY = cellYear;
+    if(normM < 0){ normM = 11; normY -= 1; }
+    if(normM > 11){ normM = 0; normY += 1; }
+    const ds = dateStr(normY, normM, cellDate);
+
+    const cell = document.createElement('div');
+    cell.className = 'day-cell' + (otherMonth ? ' other-month':'') + (ds===todayStr ? ' today':'');
+    cell.dataset.date = ds;
+
+    const top = document.createElement('div');
+    top.className = 'day-top';
+    const num = document.createElement('span');
+    num.className = 'day-number';
+    num.textContent = cellDate;
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-day-btn';
+    addBtn.textContent = '+';
+    addBtn.title = 'Agregar contenido';
+    addBtn.addEventListener('click', (e)=>{ e.stopPropagation(); openAddModal(ds); });
+    top.appendChild(num); top.appendChild(addBtn);
+    cell.appendChild(top);
+
+    const dayItems = items.filter(it => it.date === ds && (activeFilter==='all' || it.platform===activeFilter));
+    if(!otherMonth) monthCount += items.filter(it=>it.date===ds).length;
+
+    dayItems.forEach(it=>{
+      const pill = document.createElement('div');
+      pill.className = 'pill';
+      pill.draggable = true;
+      pill.dataset.platform = it.platform;
+      pill.dataset.id = it.id;
+      pill.innerHTML = `<span class="p-badge ${it.platform}">${platformLabel(it.platform)}</span>
+        <span class="p-title">${escapeHtml(it.title||'(sin título)')}</span>
+        <span class="status-dot ${it.status}"></span>`;
+      pill.addEventListener('click', (e)=>{ e.stopPropagation(); openEditModal(it); });
+      pill.addEventListener('dragstart', (e)=>{
+        e.dataTransfer.setData('text/plain', it.id);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      cell.appendChild(pill);
+    });
+
+    cell.addEventListener('click', ()=> openAddModal(ds));
+    cell.addEventListener('dragover', (e)=>{ e.preventDefault(); cell.classList.add('drag-over'); });
+    cell.addEventListener('dragleave', ()=> cell.classList.remove('drag-over'));
+    cell.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      cell.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('text/plain');
+      if(!id) return;
+      persistMutation(arr=>{
+        const it = arr.find(x=>x.id===id);
+        if(it) it.date = ds;
+      }).then(ok=>{ if(ok) showToast('Movido a ' + ds.split('-').reverse().join('/')); });
+    });
+
+    grid.appendChild(cell);
+  }
+
+  $('monthFooter').textContent = `${monthCount} contenido${monthCount===1?'':'s'} planificado${monthCount===1?'':'s'} este mes`;
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ---------------- modal: add/edit ---------------- */
+function openAddModal(ds){
+  currentEditId = null;
+  $('modalTitle').textContent = 'Nuevo contenido';
+  $('fieldId').value = '';
+  $('fieldDate').value = ds;
+  $('fieldPlatform').value = 'instagram';
+  $('fieldTitle').value = '';
+  $('fieldStatus').value = 'borrador';
+  $('fieldOwner').value = userName;
+  $('fieldNotes').value = '';
+  $('deleteBtn').style.display = 'none';
+  $('commentsSection').style.display = 'none';
+  showOverlay('contentOverlay');
+}
+
+function openEditModal(it){
+  currentEditId = it.id;
+  $('modalTitle').textContent = 'Editar contenido';
+  $('fieldId').value = it.id;
+  $('fieldDate').value = it.date;
+  $('fieldPlatform').value = it.platform;
+  $('fieldTitle').value = it.title || '';
+  $('fieldStatus').value = it.status || 'borrador';
+  $('fieldOwner').value = it.owner || '';
+  $('fieldNotes').value = it.notes || '';
+  $('deleteBtn').style.display = 'inline-block';
+  $('commentsSection').style.display = 'block';
+  renderComments(it);
+  showOverlay('contentOverlay');
+}
+
+function renderComments(it){
+  const list = $('commentsList');
+  list.innerHTML = '';
+  const comments = it.comments || [];
+  if(comments.length === 0){
+    list.innerHTML = '<div class="no-comments">Todavía no hay comentarios.</div>';
+    return;
+  }
+  comments.forEach(c=>{
+    const row = document.createElement('div');
+    row.className = 'comment';
+    const initials = (c.author||'?').trim().slice(0,2).toUpperCase();
+    const when = new Date(c.ts);
+    const whenStr = `${pad(when.getDate())}/${pad(when.getMonth()+1)} ${pad(when.getHours())}:${pad(when.getMinutes())}`;
+    row.innerHTML = `<div class="avatar">${escapeHtml(initials)}</div>
+      <div class="comment-body">
+        <span class="c-head">${escapeHtml(c.author||'Anónimo')}<span class="c-time">${whenStr}</span></span>
+        <div class="c-text">${escapeHtml(c.text)}</div>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function showOverlay(id){
+  $(id).classList.add('show');
+  modalOpen = true;
+}
+function hideOverlay(id){
+  $(id).classList.remove('show');
+  modalOpen = false;
+}
+
+/* ---------------- events ---------------- */
+$('prevMonth').addEventListener('click', ()=>{
+  viewedMonth--; if(viewedMonth<0){viewedMonth=11; viewedYear--;}
+  renderCalendar();
+});
+$('nextMonth').addEventListener('click', ()=>{
+  viewedMonth++; if(viewedMonth>11){viewedMonth=0; viewedYear++;}
+  renderCalendar();
+});
+$('goToday').addEventListener('click', ()=>{
+  viewedYear = today.getFullYear(); viewedMonth = today.getMonth();
+  renderCalendar();
+});
+
+$('newContentBtn').addEventListener('click', ()=> openAddModal(dateStr(viewedYear, viewedMonth, Math.min(today.getDate(),1))) );
+
+$('cancelBtn').addEventListener('click', ()=> hideOverlay('contentOverlay'));
+$('contentOverlay').addEventListener('click', (e)=>{ if(e.target.id==='contentOverlay') hideOverlay('contentOverlay'); });
+
+$('saveBtn').addEventListener('click', async ()=>{
+  const title = $('fieldTitle').value.trim();
+  if(!title){ showToast('Poné un título para el contenido'); return; }
+  const date = $('fieldDate').value;
+  if(!date){ showToast('Elegí una fecha'); return; }
+  const payload = {
+    date,
+    platform: $('fieldPlatform').value,
+    title,
+    status: $('fieldStatus').value,
+    owner: $('fieldOwner').value.trim(),
+    notes: $('fieldNotes').value.trim(),
+  };
+
+  if(currentEditId){
+    const ok = await persistMutation(arr=>{
+      const it = arr.find(x=>x.id===currentEditId);
+      if(it) Object.assign(it, payload, {updatedAt: Date.now()});
+    });
+    if(ok){ showToast('Guardado'); hideOverlay('contentOverlay'); }
+  } else {
+    const newItem = Object.assign({
+      id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      comments: [],
+      createdBy: userName || 'Equipo Sabium',
+      createdAt: Date.now(),
+    }, payload);
+    const ok = await persistMutation(arr=> arr.push(newItem));
+    if(ok){ showToast('Contenido agregado'); hideOverlay('contentOverlay'); }
+  }
+});
+
+$('deleteBtn').addEventListener('click', async ()=>{
+  if(!currentEditId) return;
+  if(!confirm('¿Eliminar este contenido?')) return;
+  const idToDelete = currentEditId;
+  const ok = await persistMutation(arr=>{
+    const idx = arr.findIndex(x=>x.id===idToDelete);
+    if(idx>-1) arr.splice(idx,1);
+  });
+  if(ok){ showToast('Eliminado'); hideOverlay('contentOverlay'); }
+});
+
+$('addCommentBtn').addEventListener('click', async ()=>{
+  if(!currentEditId) return;
+  const text = $('newCommentText').value.trim();
+  if(!text) return;
+  const author = userName || 'Anónimo';
+  const ok = await persistMutation(arr=>{
+    const it = arr.find(x=>x.id===currentEditId);
+    if(it){
+      it.comments = it.comments || [];
+      it.comments.push({author, text, ts: Date.now()});
+    }
+  });
+  if(ok){
+    $('newCommentText').value = '';
+    const it = items.find(x=>x.id===currentEditId);
+    if(it) renderComments(it);
+  }
+});
+
+$('userNameField').addEventListener('input', (e)=>{ userName = e.target.value; });
+
+$('refreshBtn').addEventListener('click', async ()=>{ await loadItems(); showToast('Actualizado'); });
+
+$('helpBtn').addEventListener('click', ()=> showOverlay('helpOverlay'));
+$('closeHelpBtn').addEventListener('click', ()=> hideOverlay('helpOverlay'));
+$('helpOverlay').addEventListener('click', (e)=>{ if(e.target.id==='helpOverlay') hideOverlay('helpOverlay'); });
+
+$('filterBar').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  activeFilter = chip.dataset.p;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  renderCalendar();
+});
+
+/* ---------------- init ---------------- */
+loadItems();
+setInterval(()=>{ if(!modalOpen) loadItems(true); }, 20000);
+</script>
+</body>
+</html>
