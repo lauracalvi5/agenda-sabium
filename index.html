@@ -57,6 +57,8 @@
   .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .name-field{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:20px;
     padding:6px 12px;color:#fff;font-size:12.5px;font-family:var(--font-body);width:130px;}
+  select.name-field{cursor:pointer;}
+  select.name-field option{color:var(--text);background:#fff;}
   .name-field::placeholder{color:#B9C4DA;}
   .icon-btn{background:rgba(255,255,255,.12);border:none;color:#fff;width:32px;height:32px;border-radius:50%;
     cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
@@ -109,6 +111,8 @@
   .p-badge.instagram{background:var(--ig);} .p-badge.linkedin{background:var(--li);}
   .p-badge.facebook{background:var(--fb);} .p-badge.whatsapp{background:var(--wa);} .p-badge.otro{background:var(--other);}
   .pill .p-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-weight:500;}
+  .pill .canva-icon{cursor:pointer;flex-shrink:0;font-size:11px;line-height:1;}
+  .pill .canva-icon:hover{transform:scale(1.15);}
   .pill .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
   .status-dot.borrador{background:transparent;border:1.5px solid var(--muted);}
   .status-dot.listo{background:var(--teal);}
@@ -192,7 +196,10 @@
   </div>
 
   <div class="header-right">
-    <input type="text" class="name-field" id="userNameField" placeholder="Tu nombre">
+    <select class="name-field" id="userNameField">
+      <option value="">Elegí tu nombre</option>
+    </select>
+    <input type="text" class="name-field" id="userNameCustom" placeholder="Tu nombre" style="display:none;">
     <button class="icon-btn" id="refreshBtn" title="Actualizar">⟳</button>
     <button class="icon-btn" id="helpBtn" title="Cómo compartir">?</button>
     <button class="btn-primary" id="newContentBtn">+ Nuevo contenido</button>
@@ -204,7 +211,6 @@
   <div class="chip" data-p="instagram"><span class="dot" style="background:var(--ig)"></span>Instagram</div>
   <div class="chip" data-p="linkedin"><span class="dot" style="background:var(--li)"></span>LinkedIn</div>
   <div class="chip" data-p="facebook"><span class="dot" style="background:var(--fb)"></span>Facebook</div>
-  <div class="chip" data-p="whatsapp"><span class="dot" style="background:var(--wa)"></span>WhatsApp</div>
   <div class="chip" data-p="otro"><span class="dot" style="background:var(--other)"></span>Otro</div>
 </div>
 
@@ -232,7 +238,6 @@
           <option value="instagram">Instagram</option>
           <option value="linkedin">LinkedIn</option>
           <option value="facebook">Facebook</option>
-          <option value="whatsapp">WhatsApp</option>
           <option value="otro">Otro</option>
         </select>
       </div>
@@ -253,6 +258,13 @@
       <div class="field">
         <label>Responsable</label>
         <input type="text" id="fieldOwner" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="field">
+      <label>Link de Canva (opcional)</label>
+      <div style="display:flex;gap:8px;">
+        <input type="url" id="fieldCanva" placeholder="https://www.canva.com/design/..." style="flex:1;">
+        <button type="button" id="openCanvaBtn" class="btn-cancel" style="border:1.5px solid var(--border);border-radius:9px;padding:0 14px;white-space:nowrap;">Abrir ↗</button>
       </div>
     </div>
     <div class="field">
@@ -332,7 +344,10 @@ let items = [];
 const today = new Date();
 let viewedYear = today.getFullYear();
 let viewedMonth = today.getMonth();
+const USER_NAME_KEY = 'sabium_user_name';
+const TEAM_NAMES = ['Marina', 'Blanca', 'Verónica', 'Laura'];
 let userName = '';
+try{ userName = localStorage.getItem(USER_NAME_KEY) || ''; }catch(e){ /* localStorage no disponible */ }
 let activeFilter = 'all';
 let modalOpen = false;
 let currentEditId = null;
@@ -485,10 +500,20 @@ function renderCalendar(){
       pill.draggable = true;
       pill.dataset.platform = it.platform;
       pill.dataset.id = it.id;
+      const canvaIcon = it.canvaLink
+        ? `<span class="canva-icon" title="Abrir diseño en Canva">🎨</span>`
+        : '';
       pill.innerHTML = `<span class="p-badge ${it.platform}">${platformLabel(it.platform)}</span>
         <span class="p-title">${escapeHtml(it.title||'(sin título)')}</span>
+        ${canvaIcon}
         <span class="status-dot ${it.status}"></span>`;
       pill.addEventListener('click', (e)=>{ e.stopPropagation(); openEditModal(it); });
+      if(it.canvaLink){
+        pill.querySelector('.canva-icon').addEventListener('click', (e)=>{
+          e.stopPropagation();
+          window.open(it.canvaLink, '_blank', 'noopener,noreferrer');
+        });
+      }
       pill.addEventListener('dragstart', (e)=>{
         e.dataTransfer.setData('text/plain', it.id);
         e.dataTransfer.effectAllowed = 'move';
@@ -529,6 +554,7 @@ function openAddModal(ds){
   $('fieldId').value = '';
   $('fieldDate').value = ds;
   $('fieldPlatform').value = 'instagram';
+  $('fieldCanva').value = '';
   $('fieldTitle').value = '';
   $('fieldStatus').value = 'borrador';
   $('fieldOwner').value = userName;
@@ -544,6 +570,7 @@ function openEditModal(it){
   $('fieldId').value = it.id;
   $('fieldDate').value = it.date;
   $('fieldPlatform').value = it.platform;
+  $('fieldCanva').value = it.canvaLink || '';
   $('fieldTitle').value = it.title || '';
   $('fieldStatus').value = it.status || 'borrador';
   $('fieldOwner').value = it.owner || '';
@@ -602,6 +629,12 @@ $('goToday').addEventListener('click', ()=>{
 
 $('newContentBtn').addEventListener('click', ()=> openAddModal(dateStr(viewedYear, viewedMonth, Math.min(today.getDate(),1))) );
 
+$('openCanvaBtn').addEventListener('click', ()=>{
+  const url = $('fieldCanva').value.trim();
+  if(!url){ showToast('Pegá primero el link de Canva'); return; }
+  window.open(url, '_blank', 'noopener,noreferrer');
+});
+
 $('cancelBtn').addEventListener('click', ()=> hideOverlay('contentOverlay'));
 $('contentOverlay').addEventListener('click', (e)=>{ if(e.target.id==='contentOverlay') hideOverlay('contentOverlay'); });
 
@@ -616,6 +649,7 @@ $('saveBtn').addEventListener('click', async ()=>{
     title,
     status: $('fieldStatus').value,
     owner: $('fieldOwner').value.trim(),
+    canvaLink: $('fieldCanva').value.trim(),
     notes: $('fieldNotes').value.trim(),
   };
 
@@ -633,7 +667,10 @@ $('saveBtn').addEventListener('click', async ()=>{
       createdAt: Date.now(),
     }, payload);
     const ok = await persistMutation(arr=> arr.push(newItem));
-    if(ok){ showToast('Contenido agregado'); hideOverlay('contentOverlay'); }
+    if(ok){
+      showToast('Contenido agregado');
+      hideOverlay('contentOverlay');
+    }
   }
 });
 
@@ -667,7 +704,46 @@ $('addCommentBtn').addEventListener('click', async ()=>{
   }
 });
 
-$('userNameField').addEventListener('input', (e)=>{ userName = e.target.value; });
+function setUserName(name){
+  userName = name;
+  try{ localStorage.setItem(USER_NAME_KEY, userName); }catch(e){ /* localStorage no disponible */ }
+}
+
+function initNameField(){
+  const select = $('userNameField');
+  const custom = $('userNameCustom');
+  TEAM_NAMES.forEach(name=>{
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+  const otherOpt = document.createElement('option');
+  otherOpt.value = 'otro';
+  otherOpt.textContent = 'Otro...';
+  select.appendChild(otherOpt);
+
+  if(userName && TEAM_NAMES.includes(userName)){
+    select.value = userName;
+  } else if(userName){
+    select.value = 'otro';
+    custom.style.display = 'inline-block';
+    custom.value = userName;
+  }
+
+  select.addEventListener('change', ()=>{
+    if(select.value === 'otro'){
+      custom.style.display = 'inline-block';
+      custom.focus();
+      setUserName(custom.value.trim());
+    } else {
+      custom.style.display = 'none';
+      setUserName(select.value);
+    }
+  });
+
+  custom.addEventListener('input', (e)=> setUserName(e.target.value.trim()));
+}
 
 $('refreshBtn').addEventListener('click', async ()=>{ await loadItems(); showToast('Actualizado'); });
 
@@ -685,6 +761,7 @@ $('filterBar').addEventListener('click', (e)=>{
 });
 
 /* ---------------- init ---------------- */
+initNameField();
 loadItems();
 startRealtimeSync();
 </script>
