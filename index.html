@@ -670,17 +670,21 @@ function exportItemsToExcel(itemsToExport, filenameTag){
 }
 
 function pruneOldItems(itemsList){
-  if(!Array.isArray(itemsList) || itemsList.length < AUTO_PRUNE_TRIGGER_ITEMS) return {removed: 0, backedUp: false};
+  if(!Array.isArray(itemsList) || itemsList.length < AUTO_PRUNE_TRIGGER_ITEMS) return {removed: 0, backedUp: false, backupFailed: false};
   const toRemove = itemsList.filter(it => isBeforeCurrentMonth(it?.date));
-  if(toRemove.length === 0) return {removed: 0, backedUp: false};
+  if(toRemove.length === 0) return {removed: 0, backedUp: false, backupFailed: false};
   const backedUp = exportItemsToExcel(toRemove, 'meses-anteriores');
+  if(!backedUp){
+    // No se pudo generar el backup: no se borra nada para no perder información sin respaldo.
+    return {removed: 0, backedUp: false, backupFailed: true};
+  }
   const beforeCount = itemsList.length;
   for(let i = itemsList.length - 1; i >= 0; i--){
     if(isBeforeCurrentMonth(itemsList[i]?.date)){
       itemsList.splice(i, 1);
     }
   }
-  return {removed: beforeCount - itemsList.length, backedUp};
+  return {removed: beforeCount - itemsList.length, backedUp, backupFailed: false};
 }
 
 function formatNumber(value){
@@ -969,10 +973,9 @@ async function persistMutation(mutateFn){
   }
   renderCalendar();
   if(pruneResult.removed > 0){
-    const backupNote = pruneResult.backedUp
-      ? ' Se descargó un Excel con esa info antes de borrarla.'
-      : ' (No se pudo generar el Excel de respaldo — avisale a alguien del equipo)';
-    showToast(`Se limpiaron ${pruneResult.removed} contenidos antiguos para cuidar el límite.${backupNote}`);
+    showToast(`Se limpiaron ${pruneResult.removed} contenidos antiguos para cuidar el límite. Se descargó un Excel con esa info antes de borrarla.`);
+  } else if(pruneResult.backupFailed){
+    showToast('Se llegó al límite de contenidos, pero no se pudo generar el Excel de respaldo. No se borró nada — avisale a alguien del equipo para poder liberar espacio.');
   }
   return true;
 }
