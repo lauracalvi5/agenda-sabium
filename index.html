@@ -284,11 +284,11 @@
   <div class="modal" style="max-width:420px;">
     <h2>Cómo compartir este calendario</h2>
     <ul class="help-list">
-      <li>Esta app guarda los contenidos en un espacio <strong>compartido</strong>: cualquier persona que abra este mismo link va a poder ver, agregar, mover y comentar contenidos — no hace falta login.</li>
-      <li>Para que tu equipo lo vea, compartí el link de este mismo artifact (no le pidan a otro Claude que lo regenere: sería una copia separada, sin los datos que cargaste).</li>
-      <li>Los cambios de otras personas aparecen solos cada ~20 segundos, o tocá ⟳ para actualizar al toque.</li>
+      <li>Esta app guarda los contenidos en una base de datos <strong>compartida</strong>: cualquier persona que entre a esta página va a poder ver, agregar, mover y comentar contenidos — no hace falta login.</li>
+      <li>Los cambios de otras personas aparecen solos, casi al instante. El botón ⟳ hace una actualización manual igual, por si acaso.</li>
       <li>En computadora podés arrastrar las tarjetas a otro día. En el celular, abrí la tarjeta y cambiá la fecha desde ahí.</li>
       <li>El campo "Tu nombre" solo se usa para identificar quién creó o comentó cada contenido — se reinicia si recargás la página.</li>
+      <li>Como no tiene login, cualquiera que tenga el link de la página puede ver y editar el calendario. Pensala como una pizarra compartida del equipo, no como algo privado.</li>
     </ul>
     <div class="modal-actions">
       <div style="margin-left:auto;">
@@ -300,7 +300,32 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+// ============================================================
+// FIREBASE — reemplazá estos valores por los de TU proyecto.
+// Los sacás en: Firebase Console → ⚙️ Configuración del proyecto
+// → "Tus apps" → app web → "Config"
+// ============================================================
+
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDiBZ_0HZRW4FVkfXSpXv9HA14OwOAP1JA",
+    authDomain: "sabium-calendario.firebaseapp.com",
+    projectId: "sabium-calendario",
+    storageBucket: "sabium-calendario.firebasestorage.app",
+    messagingSenderId: "357205863415",
+    appId: "1:357205863415:web:c89aee666e413fdbce5cf2"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+// ============================================================
+
 const STORAGE_KEY = 'sabium_content_calendar_v1';
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
@@ -330,39 +355,49 @@ function platformLabel(p){
   return {instagram:'IG', linkedin:'LI', facebook:'FB', whatsapp:'WA', otro:'Otro'}[p] || p;
 }
 
-/* ---------------- storage ---------------- */
+/* ---------------- storage (Firestore, compartido para todos los dispositivos) ---------------- */
 async function readStoredItems(){
   try{
-    if(window.storage && typeof window.storage.get === 'function'){
-      const res = await window.storage.get(STORAGE_KEY, true);
-      return res && res.value ? JSON.parse(res.value) : [];
+    const snap = await getDoc(calendarDocRef);
+    if(snap.exists() && snap.data().payload){
+      lastSyncedPayload = snap.data().payload;
+      return JSON.parse(snap.data().payload);
     }
-  }catch(e){}
-
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    return [];
   }catch(e){
+    console.error('Error leyendo Firestore', e);
+    showToast('No se pudo conectar con la base de datos.');
     return [];
   }
 }
 
 async function writeStoredItems(value){
-  const serialized = JSON.stringify(value);
-
   try{
-    if(window.storage && typeof window.storage.set === 'function'){
-      await window.storage.set(STORAGE_KEY, serialized, true);
-      return true;
-    }
-  }catch(e){}
-
-  try{
-    localStorage.setItem(STORAGE_KEY, serialized);
+    const serialized = JSON.stringify(value);
+    await setDoc(calendarDocRef, { payload: serialized, updatedAt: Date.now() });
+    lastSyncedPayload = serialized;
     return true;
   }catch(e){
+    console.error('Error escribiendo en Firestore', e);
     return false;
   }
+}
+
+// Sincronización en tiempo real: cuando otra persona cambia algo, se actualiza solo.
+function startRealtimeSync(){
+  onSnapshot(calendarDocRef, (snap)=>{
+    if(modalOpen) return; // no interrumpir a alguien que está editando/comentando
+    if(!snap.exists() || !snap.data().payload) return;
+    const incoming = snap.data().payload;
+    if(incoming === lastSyncedPayload) return; // es nuestro propio cambio, ya renderizado
+    lastSyncedPayload = incoming;
+    try{
+      items = JSON.parse(incoming);
+      renderCalendar();
+    }catch(e){ /* ignore malformed payload */ }
+  }, (err)=>{
+    console.error('Error de sincronización', err);
+  });
 }
 
 async function loadItems(silent){
@@ -652,7 +687,7 @@ $('filterBar').addEventListener('click', (e)=>{
 
 /* ---------------- init ---------------- */
 loadItems();
-setInterval(()=>{ if(!modalOpen) loadItems(true); }, 20000);
+startRealtimeSync();
 </script>
 </body>
 </html>
