@@ -110,6 +110,8 @@
   .pill .p-badge{font-weight:700;font-size:8.5px;padding:1px 4px;border-radius:4px;color:#fff;flex-shrink:0;}
   .p-badge.instagram{background:var(--ig);} .p-badge.linkedin{background:var(--li);}
   .p-badge.facebook{background:var(--fb);} .p-badge.whatsapp{background:var(--wa);} .p-badge.otro{background:var(--other);}
+  .pill .promo-badge{font-weight:700;font-size:8px;padding:1px 4px;border-radius:4px;color:#fff;flex-shrink:0;background:var(--navy);}
+  .pill .promo-badge.no{background:var(--muted);}
   .pill .p-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-weight:500;}
   .pill .canva-icon{cursor:pointer;flex-shrink:0;font-size:11px;line-height:1;}
   .pill .canva-icon:hover{transform:scale(1.15);}
@@ -259,6 +261,13 @@
         <label>Responsable</label>
         <input type="text" id="fieldOwner" placeholder="Opcional">
       </div>
+    </div>
+    <div class="field">
+      <label>¿Es publicidad?</label>
+      <select id="fieldIsAd">
+        <option value="no">No, es contenido orgánico</option>
+        <option value="yes">Sí, es publicidad</option>
+      </select>
     </div>
     <div class="field">
       <label>Link de Canva (opcional)</label>
@@ -500,10 +509,13 @@ function renderCalendar(){
       pill.draggable = true;
       pill.dataset.platform = it.platform;
       pill.dataset.id = it.id;
+      const adClass = it.isAd ? '' : ' no';
+      const adText = it.isAd ? 'Publicidad' : 'Orgánico';
       const canvaIcon = it.canvaLink
         ? `<span class="canva-icon" title="Abrir diseño en Canva">🎨</span>`
         : '';
       pill.innerHTML = `<span class="p-badge ${it.platform}">${platformLabel(it.platform)}</span>
+        <span class="promo-badge${adClass}">${adText}</span>
         <span class="p-title">${escapeHtml(it.title||'(sin título)')}</span>
         ${canvaIcon}
         <span class="status-dot ${it.status}"></span>`;
@@ -554,6 +566,7 @@ function openAddModal(ds){
   $('fieldId').value = '';
   $('fieldDate').value = ds;
   $('fieldPlatform').value = 'instagram';
+  $('fieldIsAd').value = 'no';
   $('fieldCanva').value = '';
   $('fieldTitle').value = '';
   $('fieldStatus').value = 'borrador';
@@ -570,6 +583,7 @@ function openEditModal(it){
   $('fieldId').value = it.id;
   $('fieldDate').value = it.date;
   $('fieldPlatform').value = it.platform;
+  $('fieldIsAd').value = it.isAd ? 'yes' : 'no';
   $('fieldCanva').value = it.canvaLink || '';
   $('fieldTitle').value = it.title || '';
   $('fieldStatus').value = it.status || 'borrador';
@@ -646,6 +660,7 @@ $('saveBtn').addEventListener('click', async ()=>{
   const payload = {
     date,
     platform: $('fieldPlatform').value,
+    isAd: $('fieldIsAd').value === 'yes',
     title,
     status: $('fieldStatus').value,
     owner: $('fieldOwner').value.trim(),
