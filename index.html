@@ -282,6 +282,7 @@
       <option value="">Elegí tu nombre</option>
     </select>
     <input type="text" class="name-field" id="userNameCustom" placeholder="Tu nombre" style="display:none;">
+    <button class="icon-btn" id="backupBtn" title="Descargar todo en Excel">⬇</button>
     <button class="btn-primary" id="newContentBtn">+ Nuevo contenido</button>
   </div>
 </div>
@@ -482,6 +483,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script type="module">
 // ============================================================
 // FIREBASE — reemplazá estos valores por los de TU proyecto.
@@ -552,15 +554,133 @@ function isBeforeCurrentMonth(dateValue){
   return typeof dateValue === 'string' && dateValue < currentMonthStartStr;
 }
 
+function formatDateTimeAR(ts){
+  if(!ts) return '';
+  const d = new Date(ts);
+  if(Number.isNaN(d.getTime())) return '';
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+const EXCEL_COLUMN_WIDTHS = {
+  'Fecha': 12, 'Plataforma': 11, 'Título': 30, 'Estado': 13, '¿Es publicidad?': 14,
+  'Responsable': 14, 'Link de Canva': 32, 'Notas': 34, 'Visualizaciones': 14,
+  'Consultas a WhatsApp': 16, 'Clicks al enlace': 14, 'Costo Total': 12,
+  'Cantidad de comentarios': 12, 'Comentarios': 40, 'Creado por': 13,
+  'Creado el': 16, 'Última edición': 16,
+  'Fecha del contenido': 14, 'Título del contenido': 28, 'Autor del comentario': 16,
+  'Comentario': 40, 'Fecha del comentario': 16,
+};
+const EXCEL_WRAP_COLUMNS = new Set(['Notas', 'Comentarios', 'Comentario', 'Título', 'Título del contenido']);
+const EXCEL_THIN_BORDER = { style: 'thin', color: { rgb: 'D9DEE8' } };
+const EXCEL_ALL_BORDERS = { top: EXCEL_THIN_BORDER, bottom: EXCEL_THIN_BORDER, left: EXCEL_THIN_BORDER, right: EXCEL_THIN_BORDER };
+
+function styleExcelSheet(ws, headers){
+  if(!ws['!ref']) return;
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  ws['!cols'] = headers.map(h => ({ wch: EXCEL_COLUMN_WIDTHS[h] || 16 }));
+  ws['!rows'] = [{ hpt: 22 }];
+
+  for(let R = range.s.r; R <= range.e.r; R++){
+    for(let C = range.s.c; C <= range.e.c; C++){
+      const addr = XLSX.utils.encode_cell({ r: R, c: C });
+      if(!ws[addr]) ws[addr] = { t: 's', v: '' };
+      const header = headers[C];
+      const isHeader = R === 0;
+      ws[addr].s = {
+        border: EXCEL_ALL_BORDERS,
+        alignment: {
+          vertical: 'center',
+          horizontal: isHeader ? 'center' : 'left',
+          wrapText: isHeader || EXCEL_WRAP_COLUMNS.has(header),
+        },
+        font: isHeader
+          ? { bold: true, color: { rgb: 'FFFFFF' }, sz: 11 }
+          : { sz: 10.5, color: { rgb: '1C2B4A' } },
+        fill: isHeader
+          ? { fgColor: { rgb: '1C2B4A' } }
+          : (R % 2 === 0 ? { fgColor: { rgb: 'F4F6F9' } } : undefined),
+      };
+    }
+  }
+}
+
+function exportItemsToExcel(itemsToExport, filenameTag){
+  if(!Array.isArray(itemsToExport) || itemsToExport.length === 0) return false;
+  if(typeof XLSX === 'undefined'){
+    console.error('XLSX no está disponible; no se pudo generar el backup.');
+    return false;
+  }
+  try{
+    const contentHeaders = ['Fecha','Plataforma','Título','Estado','¿Es publicidad?','Responsable','Link de Canva','Notas','Visualizaciones','Consultas a WhatsApp','Clicks al enlace','Costo Total','Cantidad de comentarios','Comentarios','Creado por','Creado el','Última edición'];
+    const contentRows = itemsToExport.map(it=>{
+      const stats = it.stats || {};
+      const comments = it.comments || [];
+      return {
+        'Fecha': it.date || '',
+        'Plataforma': platformLabel(it.platform) || it.platform || '',
+        'Título': it.title || '',
+        'Estado': it.status || '',
+        '¿Es publicidad?': it.isAd ? 'Sí' : 'No',
+        'Responsable': it.owner || '',
+        'Link de Canva': it.canvaLink || '',
+        'Notas': it.notes || '',
+        'Visualizaciones': it.isAd ? normalizeInt(stats.views) : '',
+        'Consultas a WhatsApp': it.isAd ? normalizeInt(stats.whatsapp) : '',
+        'Clicks al enlace': it.isAd ? normalizeInt(stats.clicks) : '',
+        'Costo Total': it.isAd ? normalizeInt(stats.leads) : '',
+        'Cantidad de comentarios': comments.length,
+        'Comentarios': comments.map(c => `${c.author}: ${c.text}`).join('\n'),
+        'Creado por': it.createdBy || '',
+        'Creado el': formatDateTimeAR(it.createdAt),
+        'Última edición': formatDateTimeAR(it.updatedAt),
+      };
+    });
+
+    const commentHeaders = ['Fecha del contenido','Título del contenido','Autor del comentario','Comentario','Fecha del comentario'];
+    const commentRows = [];
+    itemsToExport.forEach(it=>{
+      (it.comments || []).forEach(c=>{
+        commentRows.push({
+          'Fecha del contenido': it.date || '',
+          'Título del contenido': it.title || '',
+          'Autor del comentario': c.author || '',
+          'Comentario': c.text || '',
+          'Fecha del comentario': formatDateTimeAR(c.ts),
+        });
+      });
+    });
+
+    const wb = XLSX.utils.book_new();
+    const wsContent = XLSX.utils.json_to_sheet(contentRows, { header: contentHeaders });
+    styleExcelSheet(wsContent, contentHeaders);
+    XLSX.utils.book_append_sheet(wb, wsContent, 'Contenidos');
+    if(commentRows.length > 0){
+      const wsComments = XLSX.utils.json_to_sheet(commentRows, { header: commentHeaders });
+      styleExcelSheet(wsComments, commentHeaders);
+      XLSX.utils.book_append_sheet(wb, wsComments, 'Comentarios');
+    }
+
+    const stamp = dateStr(today.getFullYear(), today.getMonth(), today.getDate());
+    XLSX.writeFile(wb, `sabium-backup-${filenameTag}-${stamp}.xlsx`);
+    return true;
+  }catch(e){
+    console.error('Error generando el backup en Excel', e);
+    return false;
+  }
+}
+
 function pruneOldItems(itemsList){
-  if(!Array.isArray(itemsList) || itemsList.length < AUTO_PRUNE_TRIGGER_ITEMS) return {removed: 0};
+  if(!Array.isArray(itemsList) || itemsList.length < AUTO_PRUNE_TRIGGER_ITEMS) return {removed: 0, backedUp: false};
+  const toRemove = itemsList.filter(it => isBeforeCurrentMonth(it?.date));
+  if(toRemove.length === 0) return {removed: 0, backedUp: false};
+  const backedUp = exportItemsToExcel(toRemove, 'meses-anteriores');
   const beforeCount = itemsList.length;
   for(let i = itemsList.length - 1; i >= 0; i--){
     if(isBeforeCurrentMonth(itemsList[i]?.date)){
       itemsList.splice(i, 1);
     }
   }
-  return {removed: beforeCount - itemsList.length};
+  return {removed: beforeCount - itemsList.length, backedUp};
 }
 
 function formatNumber(value){
@@ -849,7 +969,10 @@ async function persistMutation(mutateFn){
   }
   renderCalendar();
   if(pruneResult.removed > 0){
-    showToast(`Se limpiaron ${pruneResult.removed} contenidos antiguos para cuidar el límite.`);
+    const backupNote = pruneResult.backedUp
+      ? ' Se descargó un Excel con esa info antes de borrarla.'
+      : ' (No se pudo generar el Excel de respaldo — avisale a alguien del equipo)';
+    showToast(`Se limpiaron ${pruneResult.removed} contenidos antiguos para cuidar el límite.${backupNote}`);
   }
   return true;
 }
@@ -1053,6 +1176,12 @@ $('goToday').addEventListener('click', ()=>{
 });
 
 $('newContentBtn').addEventListener('click', ()=> openAddModal(dateStr(viewedYear, viewedMonth, Math.min(today.getDate(),1))) );
+
+$('backupBtn').addEventListener('click', ()=>{
+  if(items.length === 0){ showToast('No hay contenidos cargados todavía'); return; }
+  const ok = exportItemsToExcel(items, 'completo');
+  showToast(ok ? 'Backup en Excel descargado' : 'No se pudo generar el Excel');
+});
 
 $('openCanvaBtn').addEventListener('click', ()=>{
   const url = $('fieldCanva').value.trim();
