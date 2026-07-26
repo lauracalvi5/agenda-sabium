@@ -282,7 +282,6 @@
       <option value="">Elegí tu nombre</option>
     </select>
     <input type="text" class="name-field" id="userNameCustom" placeholder="Tu nombre" style="display:none;">
-    <button class="icon-btn" id="refreshBtn" title="Actualizar">⟳</button>
     <button class="btn-primary" id="newContentBtn">+ Nuevo contenido</button>
   </div>
 </div>
@@ -1229,12 +1228,6 @@ function initCommentAuthorField(){
   select.addEventListener('change', syncCommentAuthor);
   custom.addEventListener('input', syncCommentAuthor);
 }
-
-$('refreshBtn').addEventListener('click', async ()=>{ await loadItems(); showToast('Actualizado'); });
-
-$('helpBtn').addEventListener('click', ()=> showOverlay('helpOverlay'));
-$('closeHelpBtn').addEventListener('click', ()=> hideOverlay('helpOverlay'));
-$('helpOverlay').addEventListener('click', (e)=>{ if(e.target.id==='helpOverlay') hideOverlay('helpOverlay'); });
 
 $('filterBar').addEventListener('click', (e)=>{
   const chip = e.target.closest('.chip');
