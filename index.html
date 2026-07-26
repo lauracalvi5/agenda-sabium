@@ -69,6 +69,10 @@
 
   /* ---------- filters ---------- */
   .filter-bar{display:flex;gap:8px;align-items:center;padding:14px 22px 0;flex-wrap:wrap;}
+  .view-tabs{display:flex;gap:8px;align-items:center;padding:14px 22px 0;flex-wrap:wrap;max-width:1180px;margin:0 auto;}
+  .view-tab{border:1.5px solid var(--border);background:var(--card);color:var(--muted);padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;}
+  .view-tab.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .view-tab:hover{border-color:var(--navy);color:var(--navy);}
   .chip{border:1.5px solid var(--border);background:var(--card);padding:6px 13px;border-radius:20px;font-size:12.5px;
     font-weight:600;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:6px;transition:all .15s;}
   .chip .dot{width:8px;height:8px;border-radius:50%;}
@@ -115,6 +119,7 @@
   .pill .p-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-weight:500;}
   .pill .canva-icon{cursor:pointer;flex-shrink:0;font-size:11px;line-height:1;}
   .pill .canva-icon:hover{transform:scale(1.15);}
+  .pill .canva-icon img{display:block;width:14px;height:14px;object-fit:contain;}
   .pill .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
   .status-dot.borrador{background:transparent;border:1.5px solid var(--muted);}
   .status-dot.listo{background:var(--teal);}
@@ -122,13 +127,82 @@
 
   .month-footer{padding:8px 4px 0;font-size:12.5px;color:var(--muted);}
 
+  /* ---------- stats view ---------- */
+  .stats-wrap{padding:16px 22px 30px;max-width:1180px;margin:0 auto;display:none;}
+  .stats-hero{background:linear-gradient(135deg,#fff,var(--salmon-soft));border:1.5px solid var(--border);border-radius:18px;padding:18px;display:grid;grid-template-columns:1.6fr 1fr;gap:14px;align-items:stretch;box-shadow:0 10px 28px rgba(28,43,74,.06);}
+  .stats-hero h2{margin:0 0 8px;font-family:var(--font-display);font-size:24px;color:var(--navy);}
+  .stats-hero p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.6;}
+  .stats-best{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;}
+  .best-label{font-size:11.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);}
+  .best-title{font-family:var(--font-display);font-size:20px;color:var(--navy);margin:0;line-height:1.15;}
+  .best-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);}
+  .best-score{font-size:13px;font-weight:700;color:var(--salmon);}
+  .stats-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px;}
+  .summary-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:14px;box-shadow:0 6px 18px rgba(28,43,74,.05);}
+  .summary-card .kpi-label{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .summary-card .kpi-value{font-family:var(--font-display);font-size:26px;color:var(--navy);line-height:1;margin-top:8px;}
+  .summary-card .kpi-help{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.35;}
+  .stats-section{margin-top:16px;background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(28,43,74,.04);}
+  .stats-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .stats-section-head h3{margin:0;font-family:var(--font-display);font-size:18px;color:var(--navy);}
+  .stats-section-head p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.5;}
+  .rank-list{display:flex;flex-direction:column;gap:10px;}
+  .rank-item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px;border:1.5px solid var(--border);border-radius:16px;background:#fbfcfe;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s;}
+  .rank-item:hover{transform:translateY(-1px);border-color:var(--salmon);box-shadow:0 10px 24px rgba(28,43,74,.08);}
+  .rank-position{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;background:var(--navy);color:#fff;flex-shrink:0;}
+  .rank-item.top .rank-position{background:var(--salmon);}
+  .rank-main{min-width:0;pointer-events:none;}
+  .rank-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;color:var(--navy);}
+  .rank-title span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .rank-sub{font-size:12px;color:var(--muted);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;}
+  .rank-metrics{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;pointer-events:none;}
+  .metric-pill{background:#fff;border:1px solid var(--border);border-radius:999px;padding:7px 10px;font-size:12px;color:var(--text);white-space:nowrap;}
+  .metric-pill strong{color:var(--navy);}
+  .stats-empty{padding:18px;border:1.5px dashed var(--border);border-radius:16px;background:#fbfcfe;color:var(--muted);font-size:13px;line-height:1.6;}
+  .stats-card-clickable{cursor:pointer;}
+  .stats-card-clickable:hover{border-color:var(--salmon);box-shadow:0 10px 24px rgba(28,43,74,.08);}
+
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .detail-card{background:#fbfcfe;border:1.5px solid var(--border);border-radius:14px;padding:12px;}
+  .detail-card .label{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .detail-card .value{margin-top:6px;font-size:13.5px;color:var(--text);font-weight:600;word-break:break-word;}
+  .detail-card.full{grid-column:1 / -1;}
+  .detail-link{display:inline-flex;align-items:center;gap:8px;margin-top:8px;background:var(--navy);color:#fff;text-decoration:none;padding:8px 12px;border-radius:999px;font-size:12.5px;font-weight:700;}
+  .detail-link:hover{background:var(--navy-2);}
+  .detail-link.disabled{background:var(--muted);pointer-events:none;}
+  .detail-badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .detail-badge{background:#fff;border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:12px;color:var(--text);}
+  .detail-note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:8px;}
+
   /* ---------- modal ---------- */
   .overlay{position:fixed;inset:0;background:rgba(28,43,74,.55);display:none;align-items:center;justify-content:center;
     z-index:100;padding:16px;}
   .overlay.show{display:flex;}
-  .modal{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;
+  .modal{position:relative;background:#fff;border-radius:18px;padding:24px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;
     box-shadow:0 20px 50px rgba(28,43,74,.3);}
   .modal h2{font-family:var(--font-display);font-size:19px;margin:0 0 16px;color:var(--navy);}
+  .modal-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border:none;border-radius:50%;background:#fff;color:var(--muted);font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(28,43,74,.12);}
+  .modal-close:hover{background:var(--salmon-soft);color:var(--navy);}
+  .section-title{font-family:var(--font-display);font-size:14.5px;color:var(--navy);margin:0 0 10px;}
+  .edit-lock-bar{display:flex;justify-content:flex-end;margin-bottom:12px;}
+  .edit-unlock-btn{background:var(--salmon);color:#fff;border:none;padding:8px 14px;border-radius:20px;font-weight:700;font-size:12px;cursor:pointer;}
+  .edit-unlock-btn:hover{background:#df6d63;}
+  .edit-unlock-btn[disabled]{opacity:.55;cursor:not-allowed;}
+  .fields-locked .field input,
+  .fields-locked .field select,
+  .fields-locked .field textarea,
+  .fields-locked .btn-cancel:not(#openCanvaBtn),
+  .fields-locked .btn-delete,
+  .fields-locked .btn-save,
+  .fields-locked .btn-primary,
+  .fields-locked button[type=button]:not(#openCanvaBtn){pointer-events:none;opacity:.65;}
+  .fields-locked .btn-save{pointer-events:none;}
+  .fields-locked #openCanvaBtn{pointer-events:auto;opacity:1;}
+  .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .stat-card{border:1.5px solid var(--border);border-radius:12px;padding:12px;background:#fbfcfe;}
+  .stat-card label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:6px;}
+  .stat-card input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 10px;font-family:var(--font-body);font-size:13px;}
+  .stat-note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5;}
   .field{margin-bottom:13px;}
   .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;}
   .field input[type=text], .field input[type=date], .field select, .field textarea{
@@ -172,8 +246,14 @@
     .app-header{padding:13px 14px;}
     .brand .name{font-size:19px;}
     .month-label{min-width:140px;font-size:16px;}
+    .view-tabs{padding:12px 14px 0;}
     .filter-bar{padding:12px 14px 0;}
     .calendar-wrap{padding:12px 8px 24px;}
+    .stats-wrap{padding:12px 8px 24px;}
+    .stats-hero{grid-template-columns:1fr;padding:14px;border-radius:16px;}
+    .stats-summary{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .rank-item{grid-template-columns:auto 1fr;}
+    .rank-metrics{grid-column:1 / -1;justify-content:flex-start;}
     .day-cell{min-height:70px;padding:5px;}
     .day-number{width:20px;height:20px;font-size:11.5px;}
     .pill{font-size:9.5px;padding:3px 4px;}
@@ -208,89 +288,172 @@
   </div>
 </div>
 
-<div class="filter-bar" id="filterBar">
-  <div class="chip active" data-p="all"><span class="dot" style="background:var(--navy)"></span>Todas</div>
-  <div class="chip" data-p="instagram"><span class="dot" style="background:var(--ig)"></span>Instagram</div>
-  <div class="chip" data-p="linkedin"><span class="dot" style="background:var(--li)"></span>LinkedIn</div>
-  <div class="chip" data-p="facebook"><span class="dot" style="background:var(--fb)"></span>Facebook</div>
-  <div class="chip" data-p="otro"><span class="dot" style="background:var(--other)"></span>Otro</div>
+<div class="view-tabs" id="viewTabs">
+  <button class="view-tab active" data-view="calendar" type="button">Calendario</button>
+  <button class="view-tab" data-view="stats" type="button">Estadísticas</button>
 </div>
 
-<div class="calendar-wrap">
-  <div class="weekday-header">
-    <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+<div id="calendarView">
+  <div class="filter-bar" id="filterBar">
+    <div class="chip active" data-p="all"><span class="dot" style="background:var(--navy)"></span>Todas</div>
+    <div class="chip" data-p="instagram"><span class="dot" style="background:var(--ig)"></span>Instagram</div>
+    <div class="chip" data-p="linkedin"><span class="dot" style="background:var(--li)"></span>LinkedIn</div>
+    <div class="chip" data-p="facebook"><span class="dot" style="background:var(--fb)"></span>Facebook</div>
+    <div class="chip" data-p="otro"><span class="dot" style="background:var(--other)"></span>Otro</div>
   </div>
-  <div class="calendar-grid" id="calendarGrid"></div>
-  <div class="month-footer" id="monthFooter"></div>
+  <div class="calendar-wrap">
+    <div class="weekday-header">
+      <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+    <div class="month-footer" id="monthFooter"></div>
+  </div>
+</div>
+
+<div class="stats-wrap" id="statsView">
+  <div class="stats-hero">
+    <div>
+      <h2>Estadísticas totales</h2>
+      <p>Acá ves el rendimiento acumulado de todas las publicidades. El ranking ordena las piezas por un puntaje de rendimiento que prioriza las acciones sobre el alcance, para que quede claro cuál fue la que mejor anduvo.</p>
+      <div class="stats-summary" id="statsSummary"></div>
+    </div>
+    <div class="stats-best" id="bestAdCard">
+      <div class="best-label">Mejor publicidad</div>
+      <div>
+        <h3 class="best-title" id="bestAdTitle">Sin datos todavía</h3>
+        <div class="best-meta" id="bestAdMeta"></div>
+      </div>
+      <div class="best-score" id="bestAdScore"></div>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <div class="stats-section-head">
+      <div>
+        <h3>Ranking de publicidades</h3>
+        <p id="rankingHint">Ordenado de la que mejor rendimiento tuvo a la que menos impacto generó.</p>
+      </div>
+    </div>
+    <div class="rank-list" id="rankingList"></div>
+    <div class="stats-empty" id="statsEmpty" style="display:none;">
+      Aún no hay publicidades cargadas. Cuando marques piezas como publicidad y les agregues métricas, acá vas a ver el ranking automático.
+    </div>
+  </div>
+</div>
+
+<!-- Stats detail modal -->
+<div class="overlay" id="statsDetailOverlay">
+  <div class="modal" style="max-width:560px;">
+    <button type="button" class="modal-close" id="closeStatsDetailBtn" aria-label="Cerrar detalle">×</button>
+    <h2 id="statsDetailTitle">Detalle de publicidad</h2>
+    <div class="detail-grid" id="statsDetailGrid"></div>
+    <div class="detail-note" id="statsDetailNote"></div>
+  </div>
 </div>
 
 <!-- Add/Edit modal -->
 <div class="overlay" id="contentOverlay">
   <div class="modal">
+    <button type="button" class="modal-close" id="closeContentBtn" aria-label="Cerrar modal">×</button>
     <h2 id="modalTitle">Nuevo contenido</h2>
     <input type="hidden" id="fieldId">
-    <div class="row2">
-      <div class="field">
-        <label>Fecha</label>
-        <input type="date" id="fieldDate">
+    <div class="edit-lock-bar" id="editLockBar">
+      <button class="edit-unlock-btn" id="unlockEditBtn" type="button">Editar</button>
+    </div>
+    <div id="editFieldsWrap" class="fields-locked">
+      <div class="row2">
+        <div class="field">
+          <label>Fecha</label>
+          <input type="date" id="fieldDate">
+        </div>
+        <div class="field">
+          <label>Plataforma</label>
+          <select id="fieldPlatform">
+            <option value="instagram">Instagram</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="facebook">Facebook</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
       </div>
       <div class="field">
-        <label>Plataforma</label>
-        <select id="fieldPlatform">
-          <option value="instagram">Instagram</option>
-          <option value="linkedin">LinkedIn</option>
-          <option value="facebook">Facebook</option>
-          <option value="otro">Otro</option>
+        <label>Título / qué se publica</label>
+        <input type="text" id="fieldTitle" placeholder="Ej: Carrusel autoevaluación pre-digitalización">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Estado</label>
+          <select id="fieldStatus">
+            <option value="borrador">Borrador</option>
+            <option value="listo">Listo para publicar</option>
+            <option value="publicado">Publicado</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Responsable</label>
+          <input type="text" id="fieldOwner" placeholder="Opcional">
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Es publicidad?</label>
+        <select id="fieldIsAd">
+          <option value="no">No, es contenido orgánico</option>
+          <option value="yes">Sí, es publicidad</option>
         </select>
       </div>
-    </div>
-    <div class="field">
-      <label>Título / qué se publica</label>
-      <input type="text" id="fieldTitle" placeholder="Ej: Carrusel autoevaluación pre-digitalización">
-    </div>
-    <div class="row2">
       <div class="field">
-        <label>Estado</label>
-        <select id="fieldStatus">
-          <option value="borrador">Borrador</option>
-          <option value="listo">Listo para publicar</option>
-          <option value="publicado">Publicado</option>
-        </select>
+        <label>Link de Canva (opcional)</label>
+        <div style="display:flex;gap:8px;">
+          <input type="url" id="fieldCanva" placeholder="https://www.canva.com/design/..." style="flex:1;">
+          <button type="button" id="openCanvaBtn" class="btn-cancel" style="border:1.5px solid var(--border);border-radius:9px;padding:0 14px;white-space:nowrap;">Abrir ↗</button>
+        </div>
       </div>
       <div class="field">
-        <label>Responsable</label>
-        <input type="text" id="fieldOwner" placeholder="Opcional">
+        <label>Notas</label>
+        <textarea id="fieldNotes" placeholder="Copy, link al archivo, detalles..."></textarea>
       </div>
-    </div>
-    <div class="field">
-      <label>¿Es publicidad?</label>
-      <select id="fieldIsAd">
-        <option value="no">No, es contenido orgánico</option>
-        <option value="yes">Sí, es publicidad</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Link de Canva (opcional)</label>
-      <div style="display:flex;gap:8px;">
-        <input type="url" id="fieldCanva" placeholder="https://www.canva.com/design/..." style="flex:1;">
-        <button type="button" id="openCanvaBtn" class="btn-cancel" style="border:1.5px solid var(--border);border-radius:9px;padding:0 14px;white-space:nowrap;">Abrir ↗</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Notas</label>
-      <textarea id="fieldNotes" placeholder="Copy, link al archivo, detalles..."></textarea>
-    </div>
 
-    <div class="modal-actions">
-      <button class="btn-delete" id="deleteBtn" style="display:none;">Eliminar</button>
-      <div style="display:flex;gap:14px;align-items:center;margin-left:auto;">
-        <button class="btn-cancel" id="cancelBtn">Cancelar</button>
-        <button class="btn-save" id="saveBtn">Guardar</button>
+      <div class="field" id="statsFieldBlock" style="display:none;">
+        <div class="section-title">Estadísticas de publicidad</div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <label>Visualizaciones</label>
+            <input type="number" id="statViews" min="0" step="1" placeholder="0">
+          </div>
+          <div class="stat-card">
+            <label>Consultas a WhatsApp</label>
+            <input type="number" id="statWhatsapp" min="0" step="1" placeholder="0">
+          </div>
+          <div class="stat-card">
+            <label>Clicks al enlace</label>
+            <input type="number" id="statClicks" min="0" step="1" placeholder="0">
+          </div>
+          <div class="stat-card">
+            <label>Costo Total</label>
+            <input type="number" id="statLeads" min="0" step="1" placeholder="0">
+          </div>
+        </div>
+        <div class="stat-note">Estas métricas solo se muestran para piezas marcadas como publicidad.</div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-delete" id="deleteBtn" style="display:none;">Eliminar</button>
+        <div style="display:flex;gap:14px;align-items:center;margin-left:auto;">
+          <button class="btn-cancel" id="cancelBtn">Cancelar</button>
+          <button class="btn-save" id="saveBtn">Guardar</button>
+        </div>
       </div>
     </div>
 
     <div class="comments-section" id="commentsSection" style="display:none;">
       <h3>Comentarios</h3>
+      <div class="field">
+        <label>Tu nombre</label>
+        <select id="commentAuthorField">
+          <option value="">Elegí tu nombre</option>
+        </select>
+        <input type="text" id="commentAuthorCustom" placeholder="Otro nombre" style="display:none;margin-top:8px;">
+      </div>
       <div id="commentsList"></div>
       <div class="new-comment">
         <textarea id="newCommentText" placeholder="Dejar un comentario..."></textarea>
@@ -354,12 +517,14 @@ const today = new Date();
 let viewedYear = today.getFullYear();
 let viewedMonth = today.getMonth();
 const USER_NAME_KEY = 'sabium_user_name';
-const TEAM_NAMES = ['Marina', 'Blanca', 'Verónica', 'Laura'];
+const TEAM_NAMES = ['Marina', 'Blanca', 'Verónica', 'Laurita'];
 let userName = '';
 try{ userName = localStorage.getItem(USER_NAME_KEY) || ''; }catch(e){ /* localStorage no disponible */ }
 let activeFilter = 'all';
+let activeView = 'calendar';
 let modalOpen = false;
 let currentEditId = null;
+let editUnlocked = false;
 
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2,'0');
@@ -376,6 +541,226 @@ function showToast(msg){
 
 function platformLabel(p){
   return {instagram:'IG', linkedin:'LI', facebook:'FB', whatsapp:'WA', otro:'Otro'}[p] || p;
+}
+
+function normalizeInt(value){
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function formatNumber(value){
+  return new Intl.NumberFormat('es-AR').format(normalizeInt(value));
+}
+
+function formatMoney(value){
+  return `$ ${formatNumber(value)}`;
+}
+
+function adPerformanceScore(item){
+  const stats = item.stats || {};
+  const views = normalizeInt(stats.views);
+  const whatsapp = normalizeInt(stats.whatsapp);
+  const clicks = normalizeInt(stats.clicks);
+  return Math.round((views * 0.2) + (whatsapp * 4) + (clicks * 3));
+}
+
+function getAdStats(){
+  return items.filter(it => it.isAd).map(item => ({
+    item,
+    stats: item.stats || {},
+    score: adPerformanceScore(item),
+  }));
+}
+
+function renderStatsView(){
+  const ads = getAdStats();
+  const totals = ads.reduce((acc, entry) => {
+    acc.count += 1;
+    acc.views += normalizeInt(entry.stats.views);
+    acc.whatsapp += normalizeInt(entry.stats.whatsapp);
+    acc.clicks += normalizeInt(entry.stats.clicks);
+    acc.cost += normalizeInt(entry.stats.leads);
+    acc.score += entry.score;
+    return acc;
+  }, {count:0, views:0, whatsapp:0, clicks:0, cost:0, score:0});
+
+  const summaryCards = [
+    {label:'Publicidades', value:totals.count, help:'Piezas marcadas como publicidad'},
+    {label:'Visualizaciones', value:totals.views, help:'Alcance acumulado'},
+    {label:'Consultas WhatsApp', value:totals.whatsapp, help:'Interacciones directas'},
+    {label:'Clicks al enlace', value:totals.clicks, help:'Tráfico generado'},
+    {label:'Costo total', value:totals.cost ? formatMoney(totals.cost) : '$ 0', help:'Según lo cargado en cada pieza'},
+  ];
+
+  $('statsSummary').innerHTML = summaryCards.map(card => `
+    <div class="summary-card stats-card-clickable" data-role="stats-summary">
+      <div class="kpi-label">${escapeHtml(card.label)}</div>
+      <div class="kpi-value">${escapeHtml(String(card.value))}</div>
+      <div class="kpi-help">${escapeHtml(card.help)}</div>
+    </div>
+  `).join('');
+
+  const ranking = ads.sort((a, b)=> b.score - a.score || (b.stats.clicks||0) - (a.stats.clicks||0) || (b.stats.whatsapp||0) - (a.stats.whatsapp||0));
+  const rankingList = $('rankingList');
+  const statsEmpty = $('statsEmpty');
+
+  if(ranking.length === 0){
+    rankingList.innerHTML = '';
+    statsEmpty.style.display = 'block';
+    $('bestAdTitle').textContent = 'Sin datos todavía';
+    $('bestAdMeta').innerHTML = '';
+    $('bestAdScore').textContent = '';
+    return;
+  }
+
+  statsEmpty.style.display = 'none';
+  const best = ranking[0];
+  $('bestAdTitle').textContent = best.item.title || '(sin título)';
+  $('bestAdMeta').innerHTML = `
+    <span>${platformLabel(best.item.platform)}</span>
+    <span>${escapeHtml(best.item.date || '')}</span>
+    <span>${best.item.isAd ? 'Publicidad' : ''}</span>
+  `;
+  $('bestAdScore').textContent = `Puntaje: ${formatNumber(best.score)}`;
+  $('bestAdCard').classList.add('stats-card-clickable');
+  $('bestAdCard').dataset.itemId = best.item.id;
+
+  rankingList.innerHTML = ranking.map((entry, index) => {
+    const stats = entry.stats || {};
+    const positionClass = index === 0 ? ' top' : '';
+    return `
+      <div class="rank-item${positionClass}" data-item-id="${escapeHtml(entry.item.id)}">
+        <div class="rank-position">${index + 1}</div>
+        <div class="rank-main">
+          <div class="rank-title">
+            <span>${escapeHtml(entry.item.title || '(sin título)')}</span>
+            ${index === 0 ? '<span class="promo-badge">Mejor</span>' : ''}
+          </div>
+          <div class="rank-sub">
+            <span>${platformLabel(entry.item.platform)}</span>
+            <span>${escapeHtml(entry.item.date || '')}</span>
+            <span>Puntaje ${formatNumber(entry.score)}</span>
+          </div>
+        </div>
+        <div class="rank-metrics">
+          <span class="metric-pill"><strong>${formatNumber(stats.views)}</strong> vistas</span>
+          <span class="metric-pill"><strong>${formatNumber(stats.whatsapp)}</strong> WhatsApp</span>
+          <span class="metric-pill"><strong>${formatNumber(stats.clicks)}</strong> clicks</span>
+          <span class="metric-pill"><strong>${formatMoney(stats.leads)}</strong> costo</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openStatsDetailModal(item){
+  const stats = item.stats || {};
+  const detailItems = [
+    {label:'Título', value:item.title || '(sin título)', full:true},
+    {label:'Plataforma', value:platformLabel(item.platform)},
+    {label:'Fecha', value:item.date || '—'},
+    {label:'Estado', value:item.status || '—'},
+    {label:'Responsable', value:item.owner || '—'},
+    {label:'Puntaje de rendimiento', value:formatNumber(adPerformanceScore(item))},
+    {label:'Visualizaciones', value:formatNumber(stats.views)},
+    {label:'Consultas WhatsApp', value:formatNumber(stats.whatsapp)},
+    {label:'Clicks al enlace', value:formatNumber(stats.clicks)},
+    {label:'Costo total', value:formatMoney(stats.leads)},
+  ];
+
+  $('statsDetailTitle').textContent = item.isAd ? 'Detalle de publicidad' : 'Detalle de contenido';
+  $('statsDetailGrid').innerHTML = detailItems.map(detail => `
+    <div class="detail-card${detail.full ? ' full' : ''}">
+      <div class="label">${escapeHtml(detail.label)}</div>
+      <div class="value">${escapeHtml(String(detail.value))}</div>
+    </div>
+  `).join('') + `
+    <div class="detail-card full">
+      <div class="label">Canva</div>
+      <div class="value">${item.canvaLink ? 'Link disponible' : 'Sin link cargado'}</div>
+      ${item.canvaLink ? `<a class="detail-link" href="${escapeHtml(item.canvaLink)}" target="_blank" rel="noopener noreferrer">Abrir Canva ↗</a>` : `<span class="detail-link disabled">Sin link de Canva</span>`}
+    </div>
+  `;
+  $('statsDetailNote').textContent = item.notes ? item.notes : 'No hay notas cargadas para esta pieza.';
+  showOverlay('statsDetailOverlay');
+}
+
+function setActiveView(view){
+  activeView = view;
+  $('calendarView').style.display = view === 'calendar' ? 'block' : 'none';
+  $('statsView').style.display = view === 'stats' ? 'block' : 'none';
+  document.querySelectorAll('.view-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.view === view));
+  if(view === 'stats') renderStatsView();
+}
+
+function currentModalItem(){
+  return currentEditId ? items.find(x => x.id === currentEditId) || null : null;
+}
+
+function modalSnapshot(){
+  return {
+    id: $('fieldId').value,
+    date: $('fieldDate').value,
+    platform: $('fieldPlatform').value,
+    title: $('fieldTitle').value.trim(),
+    status: $('fieldStatus').value,
+    owner: $('fieldOwner').value.trim(),
+    isAd: $('fieldIsAd').value === 'yes',
+    canvaLink: $('fieldCanva').value.trim(),
+    notes: $('fieldNotes').value.trim(),
+    comments: currentModalItem()?.comments || [],
+    stats: {
+      views: normalizeInt($('statViews')?.value),
+      whatsapp: normalizeInt($('statWhatsapp')?.value),
+      clicks: normalizeInt($('statClicks')?.value),
+      leads: normalizeInt($('statLeads')?.value),
+    },
+  };
+}
+
+function setEditLocked(locked){
+  editUnlocked = !locked;
+  const wrap = $('editFieldsWrap');
+  wrap.classList.toggle('fields-locked', locked);
+  wrap.querySelectorAll('input,select,textarea,button').forEach(el => {
+    if(el.id === 'openCanvaBtn'){
+      el.disabled = false;
+    } else if(el.id === 'cancelBtn' || el.id === 'saveBtn' || el.id === 'deleteBtn' || el.id === 'closeContentBtn'){
+      el.disabled = locked;
+    } else {
+      el.disabled = locked;
+    }
+  });
+  $('editLockBar').style.display = locked ? 'flex' : 'none';
+}
+
+function renderModalPreview(item){
+  $('fieldDate').value = item.date || '';
+  $('fieldPlatform').value = item.platform || 'otro';
+  $('fieldTitle').value = item.title || '';
+  $('fieldStatus').value = item.status || 'borrador';
+  $('fieldOwner').value = item.owner || '';
+  $('fieldIsAd').value = item.isAd ? 'yes' : 'no';
+  $('fieldCanva').value = item.canvaLink || '';
+  $('fieldNotes').value = item.notes || '';
+  $('commentsSection').style.display = 'block';
+  renderComments(item);
+}
+
+function renderModalStats(item){
+  const stats = item.stats || {};
+  $('statViews').value = stats.views ?? '';
+  $('statWhatsapp').value = stats.whatsapp ?? '';
+  $('statClicks').value = stats.clicks ?? '';
+  $('statLeads').value = stats.leads ?? '';
+  $('statsFieldBlock').style.display = item.isAd ? 'block' : 'none';
+}
+
+function resetModalStats(){
+  $('statViews').value = '';
+  $('statWhatsapp').value = '';
+  $('statClicks').value = '';
+  $('statLeads').value = '';
 }
 
 /* ---------------- storage (Firestore, compartido para todos los dispositivos) ---------------- */
@@ -452,6 +837,7 @@ async function persistMutation(mutateFn){
 
 /* ---------------- calendar rendering ---------------- */
 function renderCalendar(){
+  if(activeView === 'stats') renderStatsView();
   $('monthLabel').textContent = `${MONTHS[viewedMonth]} ${viewedYear}`;
   const grid = $('calendarGrid');
   grid.innerHTML = '';
@@ -510,12 +896,12 @@ function renderCalendar(){
       pill.dataset.platform = it.platform;
       pill.dataset.id = it.id;
       const adClass = it.isAd ? '' : ' no';
-      const adText = it.isAd ? 'Publicidad' : 'Orgánico';
+      const adText = it.isAd ? 'AD' : '';
       const canvaIcon = it.canvaLink
-        ? `<span class="canva-icon" title="Abrir diseño en Canva">🎨</span>`
+        ? `<span class="canva-icon" title="Abrir diseño en Canva"><img width="64" height="64" src="https://img.icons8.com/cute-clipart/64/canva-app.png" alt="canva-app"></span>`
         : '';
       pill.innerHTML = `<span class="p-badge ${it.platform}">${platformLabel(it.platform)}</span>
-        <span class="promo-badge${adClass}">${adText}</span>
+        ${adText ? `<span class="promo-badge${adClass}">${adText}</span>` : ''}
         <span class="p-title">${escapeHtml(it.title||'(sin título)')}</span>
         ${canvaIcon}
         <span class="status-dot ${it.status}"></span>`;
@@ -572,8 +958,12 @@ function openAddModal(ds){
   $('fieldStatus').value = 'borrador';
   $('fieldOwner').value = userName;
   $('fieldNotes').value = '';
+  resetModalStats();
   $('deleteBtn').style.display = 'none';
-  $('commentsSection').style.display = 'none';
+  $('commentsSection').style.display = 'block';
+  setEditLocked(false);
+  renderModalPreview(modalSnapshot());
+  renderModalStats(modalSnapshot());
   showOverlay('contentOverlay');
 }
 
@@ -591,7 +981,9 @@ function openEditModal(it){
   $('fieldNotes').value = it.notes || '';
   $('deleteBtn').style.display = 'inline-block';
   $('commentsSection').style.display = 'block';
-  renderComments(it);
+  renderModalPreview(it);
+  renderModalStats(it);
+  setEditLocked(true);
   showOverlay('contentOverlay');
 }
 
@@ -649,6 +1041,10 @@ $('openCanvaBtn').addEventListener('click', ()=>{
   window.open(url, '_blank', 'noopener,noreferrer');
 });
 
+$('unlockEditBtn').addEventListener('click', ()=>{
+  setEditLocked(false);
+});
+
 $('cancelBtn').addEventListener('click', ()=> hideOverlay('contentOverlay'));
 $('contentOverlay').addEventListener('click', (e)=>{ if(e.target.id==='contentOverlay') hideOverlay('contentOverlay'); });
 
@@ -666,6 +1062,12 @@ $('saveBtn').addEventListener('click', async ()=>{
     owner: $('fieldOwner').value.trim(),
     canvaLink: $('fieldCanva').value.trim(),
     notes: $('fieldNotes').value.trim(),
+    stats: $('fieldIsAd').value === 'yes' ? {
+      views: normalizeInt($('statViews').value),
+      whatsapp: normalizeInt($('statWhatsapp').value),
+      clicks: normalizeInt($('statClicks').value),
+      leads: normalizeInt($('statLeads').value),
+    } : null,
   };
 
   if(currentEditId){
@@ -673,7 +1075,15 @@ $('saveBtn').addEventListener('click', async ()=>{
       const it = arr.find(x=>x.id===currentEditId);
       if(it) Object.assign(it, payload, {updatedAt: Date.now()});
     });
-    if(ok){ showToast('Guardado'); hideOverlay('contentOverlay'); }
+    if(ok){
+      showToast('Guardado');
+      const updated = items.find(x=>x.id===currentEditId);
+      if(updated){
+        renderModalPreview(updated);
+        renderModalStats(updated);
+      }
+      setEditLocked(true);
+    }
   } else {
     const newItem = Object.assign({
       id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
@@ -684,7 +1094,9 @@ $('saveBtn').addEventListener('click', async ()=>{
     const ok = await persistMutation(arr=> arr.push(newItem));
     if(ok){
       showToast('Contenido agregado');
-      hideOverlay('contentOverlay');
+      currentEditId = newItem.id;
+      renderModalPreview(newItem);
+      renderModalStats(newItem);
     }
   }
 });
@@ -700,11 +1112,26 @@ $('deleteBtn').addEventListener('click', async ()=>{
   if(ok){ showToast('Eliminado'); hideOverlay('contentOverlay'); }
 });
 
+$('closeContentBtn').addEventListener('click', ()=> hideOverlay('contentOverlay'));
+
+$('fieldIsAd').addEventListener('change', ()=>{
+  if($('fieldIsAd').value === 'yes'){
+    const currentStats = modalSnapshot().stats || {};
+    if(!normalizeInt(currentStats.views) && !normalizeInt(currentStats.whatsapp) && !normalizeInt(currentStats.clicks) && !normalizeInt(currentStats.leads)){
+      resetModalStats();
+    }
+  } else {
+    resetModalStats();
+  }
+  renderModalStats(modalSnapshot());
+});
+
 $('addCommentBtn').addEventListener('click', async ()=>{
   if(!currentEditId) return;
   const text = $('newCommentText').value.trim();
   if(!text) return;
-  const author = userName || 'Anónimo';
+  const author = $('commentAuthorField').value === 'otro' ? $('commentAuthorCustom').value.trim() : $('commentAuthorField').value.trim();
+  if(!author){ showToast('Elegí tu nombre antes de comentar'); return; }
   const ok = await persistMutation(arr=>{
     const it = arr.find(x=>x.id===currentEditId);
     if(it){
@@ -715,8 +1142,15 @@ $('addCommentBtn').addEventListener('click', async ()=>{
   if(ok){
     $('newCommentText').value = '';
     const it = items.find(x=>x.id===currentEditId);
-    if(it) renderComments(it);
+    if(it) renderModalPreview(it);
   }
+});
+
+['fieldIsAd','statViews','statWhatsapp','statClicks','statLeads'].forEach(id => {
+  $(id).addEventListener('change', ()=>{
+    const snapshot = modalSnapshot();
+    renderModalStats(snapshot);
+  });
 });
 
 function setUserName(name){
@@ -760,6 +1194,43 @@ function initNameField(){
   custom.addEventListener('input', (e)=> setUserName(e.target.value.trim()));
 }
 
+function initCommentAuthorField(){
+  const select = $('commentAuthorField');
+  const custom = $('commentAuthorCustom');
+  TEAM_NAMES.forEach(name=>{
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+  const otherOpt = document.createElement('option');
+  otherOpt.value = 'otro';
+  otherOpt.textContent = 'Otro...';
+  select.appendChild(otherOpt);
+
+  if(userName && TEAM_NAMES.includes(userName)){
+    select.value = userName;
+  } else if(userName){
+    select.value = 'otro';
+    custom.style.display = 'block';
+    custom.value = userName;
+  }
+
+  const syncCommentAuthor = ()=>{
+    if(select.value === 'otro'){
+      custom.style.display = 'block';
+      userName = custom.value.trim();
+    } else {
+      custom.style.display = 'none';
+      userName = select.value;
+    }
+    try{ localStorage.setItem(USER_NAME_KEY, userName); }catch(e){ /* localStorage no disponible */ }
+  };
+
+  select.addEventListener('change', syncCommentAuthor);
+  custom.addEventListener('input', syncCommentAuthor);
+}
+
 $('refreshBtn').addEventListener('click', async ()=>{ await loadItems(); showToast('Actualizado'); });
 
 $('helpBtn').addEventListener('click', ()=> showOverlay('helpOverlay'));
@@ -775,10 +1246,33 @@ $('filterBar').addEventListener('click', (e)=>{
   renderCalendar();
 });
 
+$('viewTabs').addEventListener('click', (e)=>{
+  const tab = e.target.closest('.view-tab');
+  if(!tab) return;
+  setActiveView(tab.dataset.view);
+});
+
+$('bestAdCard').addEventListener('click', ()=>{
+  const best = getAdStats().sort((a, b)=> b.score - a.score || (b.stats.clicks||0) - (a.stats.clicks||0) || (b.stats.whatsapp||0) - (a.stats.whatsapp||0))[0];
+  if(best) openStatsDetailModal(best.item);
+});
+
+$('rankingList').addEventListener('click', (e)=>{
+  const row = e.target.closest('.rank-item');
+  if(!row) return;
+  const item = items.find(x => x.id === row.dataset.itemId);
+  if(item) openStatsDetailModal(item);
+});
+
+$('statsDetailOverlay').addEventListener('click', (e)=>{ if(e.target.id==='statsDetailOverlay') hideOverlay('statsDetailOverlay'); });
+$('closeStatsDetailBtn').addEventListener('click', ()=> hideOverlay('statsDetailOverlay'));
+
 /* ---------------- init ---------------- */
 initNameField();
+initCommentAuthorField();
 loadItems();
 startRealtimeSync();
+setActiveView('calendar');
 </script>
 </body>
 </html>
