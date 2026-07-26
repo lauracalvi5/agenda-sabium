@@ -509,6 +509,7 @@ let lastSyncedPayload = null;
 
 const STORAGE_KEY = 'sabium_content_calendar_v1';
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const AUTO_PRUNE_TRIGGER_ITEMS = 250;
 
 let items = [];
 const today = new Date();
@@ -528,6 +529,7 @@ const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2,'0');
 const dateStr = (y,m,d) => `${y}-${pad(m+1)}-${pad(d)}`;
 const todayStr = dateStr(today.getFullYear(), today.getMonth(), today.getDate());
+const currentMonthStartStr = dateStr(today.getFullYear(), today.getMonth(), 1);
 
 function showToast(msg){
   const t = $('toast');
@@ -544,6 +546,21 @@ function platformLabel(p){
 function normalizeInt(value){
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function isBeforeCurrentMonth(dateValue){
+  return typeof dateValue === 'string' && dateValue < currentMonthStartStr;
+}
+
+function pruneOldItems(itemsList){
+  if(!Array.isArray(itemsList) || itemsList.length < AUTO_PRUNE_TRIGGER_ITEMS) return {removed: 0};
+  const beforeCount = itemsList.length;
+  for(let i = itemsList.length - 1; i >= 0; i--){
+    if(isBeforeCurrentMonth(itemsList[i]?.date)){
+      itemsList.splice(i, 1);
+    }
+  }
+  return {removed: beforeCount - itemsList.length};
 }
 
 function formatNumber(value){
@@ -822,6 +839,7 @@ async function persistMutation(mutateFn){
     items = await readStoredItems();
   }catch(e){ /* keep in-memory items */ }
   mutateFn(items);
+  const pruneResult = pruneOldItems(items);
   try{
     const saved = await writeStoredItems(items);
     if(!saved) throw new Error('storage write failed');
@@ -830,6 +848,9 @@ async function persistMutation(mutateFn){
     return false;
   }
   renderCalendar();
+  if(pruneResult.removed > 0){
+    showToast(`Se limpiaron ${pruneResult.removed} contenidos antiguos para cuidar el límite.`);
+  }
   return true;
 }
 
