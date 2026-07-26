@@ -306,24 +306,23 @@
 // Los sacás en: Firebase Console → ⚙️ Configuración del proyecto
 // → "Tus apps" → app web → "Config"
 // ============================================================
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot }
+  from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+const firebaseConfig = {
+  apiKey: "AIzaSyDiBZ_0HZRW4FVkfXSpXv9HA14OwOAP1JA",
+  authDomain: "sabium-calendario.firebaseapp.com",
+  projectId: "sabium-calendario",
+  storageBucket: "sabium-calendario.firebasestorage.app",
+  messagingSenderId: "357205863415",
+  appId: "1:357205863415:web:c89aee666e413fdbce5cf2"
+};
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDiBZ_0HZRW4FVkfXSpXv9HA14OwOAP1JA",
-    authDomain: "sabium-calendario.firebaseapp.com",
-    projectId: "sabium-calendario",
-    storageBucket: "sabium-calendario.firebasestorage.app",
-    messagingSenderId: "357205863415",
-    appId: "1:357205863415:web:c89aee666e413fdbce5cf2"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+const calendarDocRef = doc(db, 'sabium_content_calendar', 'shared');
+let lastSyncedPayload = null;
 // ============================================================
 
 const STORAGE_KEY = 'sabium_content_calendar_v1';
