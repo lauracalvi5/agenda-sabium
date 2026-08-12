@@ -199,6 +199,8 @@
   .fields-locked button[type=button]:not(#openCanvaBtn){pointer-events:none;opacity:.65;}
   .fields-locked .btn-save{pointer-events:none;}
   .fields-locked #openCanvaBtn{pointer-events:auto;opacity:1;}
+  .btn-sabium-blue{background:var(--navy);border:1.5px solid var(--navy);color:#fff;border-radius:9px;padding:0 14px;white-space:nowrap;}
+  .btn-sabium-blue:hover{background:var(--navy-2);border-color:var(--navy-2);}
   .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
   .stat-card{border:1.5px solid var(--border);border-radius:12px;padding:12px;background:#fbfcfe;}
   .stat-card label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:6px;}
@@ -435,7 +437,7 @@
           <label>Link de Canva (opcional)</label>
           <div style="display:flex;gap:8px;">
             <input type="url" id="fieldCanva" placeholder="https://www.canva.com/design/..." style="flex:1;">
-            <button type="button" id="openCanvaBtn" class="btn-cancel" style="border:1.5px solid var(--border);border-radius:9px;padding:0 14px;white-space:nowrap;">Abrir ↗</button>
+            <button type="button" id="openCanvaBtn" class="btn-sabium-blue">Abrir ↗</button>
           </div>
         </div>
         <div class="field">
