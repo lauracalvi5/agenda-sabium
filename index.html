@@ -146,6 +146,7 @@
   .stats-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
   .stats-section-head h3{margin:0;font-family:var(--font-display);font-size:18px;color:var(--navy);}
   .stats-section-head p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.5;}
+  .stats-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .rank-list{display:flex;flex-direction:column;gap:10px;}
   .rank-item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px;border:1.5px solid var(--border);border-radius:16px;background:#fbfcfe;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s;}
   .rank-item:hover{transform:translateY(-1px);border-color:var(--salmon);box-shadow:0 10px 24px rgba(28,43,74,.08);}
@@ -217,6 +218,28 @@
   .btn-save:hover{background:#df6d63;}
   .btn-cancel{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-weight:600;}
   .btn-delete{background:none;border:none;color:#c0554d;font-size:12.5px;cursor:pointer;font-weight:600;}
+  .field input[readonly]{background:#eef2f7;color:var(--navy);}
+  .modal-tabs{display:flex;gap:8px;margin:4px 0 14px;}
+  .modal-tab{border:1.5px solid var(--border);background:var(--card);color:var(--muted);padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .15s;}
+  .modal-tab.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .modal-tab:hover{border-color:var(--navy);color:var(--navy);}
+  .modal-pane{display:none;}
+  .modal-pane.active{display:block;}
+  .stats-note-card{border:1.5px dashed var(--border);background:#fbfcfe;border-radius:14px;padding:12px 14px;color:var(--muted);font-size:12.5px;line-height:1.5;margin-bottom:14px;}
+  .stats-note-card strong{color:var(--navy);}
+  .stats-group{border:1.5px solid var(--border);border-radius:16px;padding:14px;background:#fff;box-shadow:0 4px 14px rgba(28,43,74,.04);margin-bottom:12px;}
+  .stats-group-title{font-family:var(--font-display);font-size:15px;color:var(--navy);margin:0 0 12px;}
+  .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .stats-grid.three{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
+  .stats-grid .field{margin-bottom:0;min-width:0;}
+  .stats-grid .field label{font-size:11.5px;}
+  .stats-grid .field input,
+  .stats-grid .field textarea,
+  .stats-grid .field select{font-size:13px;}
+  .stats-hint{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.4;}
+  .stats-empty-state{border:1.5px dashed var(--border);border-radius:14px;background:#fbfcfe;padding:12px 14px;color:var(--muted);font-size:12.5px;line-height:1.5;margin-bottom:12px;}
+  .import-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .import-summary{font-size:12px;color:var(--muted);line-height:1.35;}
 
   .comments-section{margin-top:20px;border-top:1px solid var(--border);padding-top:16px;}
   .comments-section h3{font-family:var(--font-display);font-size:14.5px;color:var(--navy);margin:0 0 10px;}
@@ -332,6 +355,9 @@
         <h3>Ranking de publicidades</h3>
         <p id="rankingHint">Ordenado de la que mejor rendimiento tuvo a la que menos impacto generó.</p>
       </div>
+      <div class="stats-head-actions">
+        <button type="button" class="btn-cancel" id="downloadInterestedClientsBtn" style="border:1.5px solid var(--border);border-radius:20px;padding:8px 14px;white-space:nowrap;">Descargar contactos</button>
+      </div>
     </div>
     <div class="rank-list" id="rankingList"></div>
     <div class="stats-empty" id="statsEmpty" style="display:none;">
@@ -359,80 +385,215 @@
     <div class="edit-lock-bar" id="editLockBar">
       <button class="edit-unlock-btn" id="unlockEditBtn" type="button">Editar</button>
     </div>
+    <div class="modal-tabs" role="tablist" aria-label="Secciones del modal">
+      <button class="modal-tab active" id="contentTabBtn" data-modal-tab="content" type="button">Contenido</button>
+      <button class="modal-tab" id="statsTabBtn" data-modal-tab="stats" type="button">Estadísticas</button>
+    </div>
     <div id="editFieldsWrap" class="fields-locked">
-      <div class="row2">
-        <div class="field">
-          <label>Fecha</label>
-          <input type="date" id="fieldDate">
+      <div class="modal-pane active" data-pane="content">
+        <div class="row2">
+          <div class="field">
+            <label>Fecha</label>
+            <input type="date" id="fieldDate">
+          </div>
+          <div class="field">
+            <label>Plataforma</label>
+            <select id="fieldPlatform">
+              <option value="instagram">Instagram</option>
+              <option value="linkedin">LinkedIn</option>
+              <option value="facebook">Facebook</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
         </div>
         <div class="field">
-          <label>Plataforma</label>
-          <select id="fieldPlatform">
-            <option value="instagram">Instagram</option>
-            <option value="linkedin">LinkedIn</option>
-            <option value="facebook">Facebook</option>
-            <option value="otro">Otro</option>
+          <label>Título / qué se publica</label>
+          <input type="text" id="fieldTitle" placeholder="Ej: Carrusel autoevaluación pre-digitalización">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Estado</label>
+            <select id="fieldStatus">
+              <option value="borrador">Borrador</option>
+              <option value="listo">Listo para publicar</option>
+              <option value="publicado">Publicado</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Responsable</label>
+            <input type="text" id="fieldOwner" placeholder="Opcional">
+          </div>
+        </div>
+        <div class="field">
+          <label>¿Es publicidad?</label>
+          <select id="fieldIsAd">
+            <option value="no">No, es contenido orgánico</option>
+            <option value="yes">Sí, es publicidad</option>
           </select>
         </div>
-      </div>
-      <div class="field">
-        <label>Título / qué se publica</label>
-        <input type="text" id="fieldTitle" placeholder="Ej: Carrusel autoevaluación pre-digitalización">
-      </div>
-      <div class="row2">
         <div class="field">
-          <label>Estado</label>
-          <select id="fieldStatus">
-            <option value="borrador">Borrador</option>
-            <option value="listo">Listo para publicar</option>
-            <option value="publicado">Publicado</option>
-          </select>
+          <label>Link de Canva (opcional)</label>
+          <div style="display:flex;gap:8px;">
+            <input type="url" id="fieldCanva" placeholder="https://www.canva.com/design/..." style="flex:1;">
+            <button type="button" id="openCanvaBtn" class="btn-cancel" style="border:1.5px solid var(--border);border-radius:9px;padding:0 14px;white-space:nowrap;">Abrir ↗</button>
+          </div>
         </div>
         <div class="field">
-          <label>Responsable</label>
-          <input type="text" id="fieldOwner" placeholder="Opcional">
+          <label>Notas</label>
+          <textarea id="fieldNotes" placeholder="Copy, link al archivo, detalles..."></textarea>
         </div>
-      </div>
-      <div class="field">
-        <label>¿Es publicidad?</label>
-        <select id="fieldIsAd">
-          <option value="no">No, es contenido orgánico</option>
-          <option value="yes">Sí, es publicidad</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Link de Canva (opcional)</label>
-        <div style="display:flex;gap:8px;">
-          <input type="url" id="fieldCanva" placeholder="https://www.canva.com/design/..." style="flex:1;">
-          <button type="button" id="openCanvaBtn" class="btn-cancel" style="border:1.5px solid var(--border);border-radius:9px;padding:0 14px;white-space:nowrap;">Abrir ↗</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Notas</label>
-        <textarea id="fieldNotes" placeholder="Copy, link al archivo, detalles..."></textarea>
       </div>
 
-      <div class="field" id="statsFieldBlock" style="display:none;">
-        <div class="section-title">Estadísticas de publicidad</div>
-        <div class="stat-grid">
-          <div class="stat-card">
-            <label>Visualizaciones</label>
-            <input type="number" id="statViews" min="0" step="1" placeholder="0">
+      <div class="modal-pane" data-pane="stats">
+        <div class="stats-empty-state" id="statsEmptyState">Marcá la pieza como publicidad para cargar esta ficha completa.</div>
+        <div id="statsFieldsWrap" style="display:none;">
+          <div class="stats-note-card">
+            Los campos con valor calculado se actualizan solos. Si no tenés un dato, podés dejarlo vacío.
           </div>
-          <div class="stat-card">
-            <label>Consultas a WhatsApp</label>
-            <input type="number" id="statWhatsapp" min="0" step="1" placeholder="0">
+
+          <div class="stats-group">
+            <h3 class="stats-group-title">Identificación</h3>
+            <div class="stats-grid">
+              <div class="field">
+                <label>Nombre de campaña</label>
+                <input type="text" id="statCampaignName" placeholder="Ej: Lanzamiento curso noviembre">
+              </div>
+              <div class="field">
+                <label>Objetivo</label>
+                <input type="text" id="statObjective" placeholder="Ej: conseguir clientes potenciales">
+              </div>
+              <div class="field">
+                <label>Fecha inicio</label>
+                <input type="date" id="statStartDate">
+              </div>
+              <div class="field">
+                <label>Fecha fin</label>
+                <input type="date" id="statEndDate">
+              </div>
+              <div class="field">
+                <label>Duración (días)</label>
+                <input type="text" id="statDurationDays" placeholder="Ej: 30 días">
+              </div>
+            </div>
           </div>
-          <div class="stat-card">
-            <label>Clicks al enlace</label>
-            <input type="number" id="statClicks" min="0" step="1" placeholder="0">
+
+          <div class="stats-group">
+            <h3 class="stats-group-title">Inversión</h3>
+            <div class="stats-grid">
+              <div class="field">
+                <label>Gasto total ($)</label>
+                <input type="number" id="statTotalSpend" min="0" step="0.01" placeholder="0">
+              </div>
+              <div class="field">
+                <label>Presupuesto diario ($)</label>
+                <input type="number" id="statDailyBudget" min="0" step="0.01" placeholder="0">
+              </div>
+            </div>
           </div>
-          <div class="stat-card">
-            <label>Costo Total</label>
-            <input type="number" id="statLeads" min="0" step="1" placeholder="0">
+
+          <div class="stats-group">
+            <h3 class="stats-group-title">Resultados / conversión</h3>
+            <div class="stats-grid">
+              <div class="field">
+                <label>Tipo de resultado</label>
+                <input type="text" id="statResultType" placeholder="Ej: Mensajes de WhatsApp">
+              </div>
+              <div class="field">
+                <label>Cantidad de resultados</label>
+                <input type="number" id="statResultCount" min="0" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label>Clientes interesados (Excel)</label>
+                <div class="import-controls">
+                  <button type="button" class="btn-cancel" id="importInterestedClientsBtn" style="border:1.5px solid var(--border);border-radius:9px;padding:8px 12px;white-space:nowrap;">Importar Excel</button>
+                  <input type="file" id="importInterestedClientsInput" accept=".xlsx,.xls" style="display:none;">
+                  <div class="import-summary" id="interestedClientsSummary">Sin Excel cargado</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-group">
+            <h3 class="stats-group-title">Alcance</h3>
+            <div class="stats-grid">
+              <div class="field">
+                <label>Visualizaciones (impresiones)</label>
+                <input type="number" id="statImpressions" min="0" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label>Espectadores (alcance único)</label>
+                <input type="number" id="statUniqueViewers" min="0" step="1" placeholder="0">
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-group">
+            <h3 class="stats-group-title">Engagement</h3>
+            <div class="stats-grid three">
+              <div class="field">
+                <label>Interacciones con la publicación</label>
+                <input type="number" id="statInteractions" min="0" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label>Reacciones</label>
+                <input type="number" id="statReactions" min="0" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label>Guardados</label>
+                <input type="number" id="statSaves" min="0" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label>Clics en el enlace</label>
+                <input type="number" id="statLinkClicks" min="0" step="1" placeholder="0">
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-group">
+            <h3 class="stats-group-title">Video</h3>
+            <div class="stats-grid">
+              <div class="field">
+                <label>Duración del video</label>
+                <input type="text" id="statVideoDuration" placeholder="Ej: 00:30">
+              </div>
+              <div class="field">
+                <label>Reproducciones de 3 segundos</label>
+                <input type="number" id="statViews3s" min="0" step="1" placeholder="0">
+              </div>
+              <div class="field">
+                <label>Tiempo promedio de reproducción</label>
+                <input type="text" id="statAvgWatchTime" placeholder="Ej: 12 s">
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-group">
+            <h3 class="stats-group-title">Audiencia</h3>
+            <div class="stats-grid">
+              <div class="field">
+                <label>% Mujeres</label>
+                <input type="number" id="statWomenPct" min="0" max="100" step="0.1" placeholder="0">
+              </div>
+              <div class="field">
+                <label>% Hombres</label>
+                <input type="number" id="statMenPct" min="0" max="100" step="0.1" placeholder="0">
+              </div>
+              <div class="field">
+                <label>Rango de edad predominante</label>
+                <input type="text" id="statAgeRange" placeholder="Ej: 25-34">
+              </div>
+              <div class="field">
+                <label>Ubicación principal</label>
+                <input type="text" id="statLocation" placeholder="Provincia / ciudad">
+              </div>
+              <div class="field">
+                <label>Plataforma principal</label>
+                <input type="text" id="statMainPlatform" placeholder="Ej: Feed IG, Stories, Reels">
+              </div>
+            </div>
+            <div class="stats-hint">Las métricas calculadas se derivan de los campos cargados en esta misma pestaña.</div>
           </div>
         </div>
-        <div class="stat-note">Estas métricas solo se muestran para piezas marcadas como publicidad.</div>
       </div>
 
       <div class="modal-actions">
@@ -526,6 +687,9 @@ let activeView = 'calendar';
 let modalOpen = false;
 let currentEditId = null;
 let editUnlocked = false;
+let activeModalTab = 'content';
+let pendingInterestedClients = [];
+let pendingInterestedClientsFileName = '';
 
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2,'0');
@@ -550,6 +714,29 @@ function normalizeInt(value){
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
+function normalizeDecimal(value){
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function calculateInclusiveDays(startDate, endDate){
+  if(!startDate || !endDate) return 0;
+  const start = new Date(`${startDate}T00:00:00`);
+  const end = new Date(`${endDate}T00:00:00`);
+  if(Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
+  const diff = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+  return diff > 0 ? diff : 0;
+}
+
+function formatDecimalDisplay(value, maxFractionDigits = 2){
+  const number = Number(value);
+  if(!Number.isFinite(number)) return '0';
+  return new Intl.NumberFormat('es-AR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxFractionDigits,
+  }).format(number);
+}
+
 function isBeforeCurrentMonth(dateValue){
   return typeof dateValue === 'string' && dateValue < currentMonthStartStr;
 }
@@ -569,6 +756,14 @@ const EXCEL_COLUMN_WIDTHS = {
   'Creado el': 16, 'Última edición': 16,
   'Fecha del contenido': 14, 'Título del contenido': 28, 'Autor del comentario': 16,
   'Comentario': 40, 'Fecha del comentario': 16,
+  'Nombre de campaña': 26, 'Objetivo': 22, 'Fecha inicio': 12, 'Fecha fin': 12,
+  'Duración (días)': 12, 'Gasto total ($)': 14, 'Presupuesto diario ($)': 16,
+  'Tipo de resultado': 24, 'Cantidad de resultados': 15, 'Costo por resultado': 16,
+  'Impresiones': 14, 'Alcance único': 14, 'Frecuencia': 12,
+  'Interacciones': 14, 'Reacciones': 12, 'Guardados': 12,
+  'Duración del video': 16, 'Reproducciones de 3 segundos': 17, 'Tiempo promedio de reproducción': 20,
+  '% Mujeres': 10, '% Hombres': 10, 'Rango de edad predominante': 20,
+  'Ubicación principal': 20, 'Plataforma principal': 18,
 };
 const EXCEL_WRAP_COLUMNS = new Set(['Notas', 'Comentarios', 'Comentario', 'Título', 'Título del contenido']);
 const EXCEL_THIN_BORDER = { style: 'thin', color: { rgb: 'D9DEE8' } };
@@ -611,9 +806,9 @@ function exportItemsToExcel(itemsToExport, filenameTag){
     return false;
   }
   try{
-    const contentHeaders = ['Fecha','Plataforma','Título','Estado','¿Es publicidad?','Responsable','Link de Canva','Notas','Visualizaciones','Consultas a WhatsApp','Clicks al enlace','Costo Total','Cantidad de comentarios','Comentarios','Creado por','Creado el','Última edición'];
+    const contentHeaders = ['Fecha','Plataforma','Título','Estado','¿Es publicidad?','Nombre de campaña','Objetivo','Fecha inicio','Fecha fin','Duración (días)','Gasto total ($)','Presupuesto diario ($)','Tipo de resultado','Cantidad de resultados','Costo por resultado','Impresiones','Alcance único','Interacciones','Reacciones','Guardados','Clics en el enlace','Duración del video','Reproducciones de 3 segundos','Tiempo promedio de reproducción','% Mujeres','% Hombres','Rango de edad predominante','Ubicación principal','Plataforma principal','Responsable','Link de Canva','Notas','Cantidad de comentarios','Comentarios','Creado por','Creado el','Última edición'];
     const contentRows = itemsToExport.map(it=>{
-      const stats = it.stats || {};
+      const stats = getNormalizedStats(it.stats || {}, it.title || '');
       const comments = it.comments || [];
       return {
         'Fecha': it.date || '',
@@ -621,13 +816,33 @@ function exportItemsToExcel(itemsToExport, filenameTag){
         'Título': it.title || '',
         'Estado': it.status || '',
         '¿Es publicidad?': it.isAd ? 'Sí' : 'No',
+        'Nombre de campaña': stats.campaignName || '',
+        'Objetivo': stats.objective || '',
+        'Fecha inicio': stats.startDate || '',
+        'Fecha fin': stats.endDate || '',
+        'Duración (días)': stats.durationDays || '',
+        'Gasto total ($)': stats.totalSpend || '',
+        'Presupuesto diario ($)': stats.dailyBudget || '',
+        'Tipo de resultado': stats.resultType || '',
+        'Cantidad de resultados': stats.resultCount || '',
+        'Costo por resultado': stats.costPerResult || '',
+        'Impresiones': stats.impressions || '',
+        'Alcance único': stats.uniqueViewers || '',
+        'Interacciones': stats.interactions || '',
+        'Reacciones': stats.reactions || '',
+        'Guardados': stats.saves || '',
+        'Clics en el enlace': stats.linkClicks || '',
+        'Duración del video': stats.videoDuration || '',
+        'Reproducciones de 3 segundos': stats.views3s || '',
+        'Tiempo promedio de reproducción': stats.avgWatchTime || '',
+        '% Mujeres': stats.womenPct || '',
+        '% Hombres': stats.menPct || '',
+        'Rango de edad predominante': stats.ageRange || '',
+        'Ubicación principal': stats.location || '',
+        'Plataforma principal': stats.mainPlatform || '',
         'Responsable': it.owner || '',
         'Link de Canva': it.canvaLink || '',
         'Notas': it.notes || '',
-        'Visualizaciones': it.isAd ? normalizeInt(stats.views) : '',
-        'Consultas a WhatsApp': it.isAd ? normalizeInt(stats.whatsapp) : '',
-        'Clicks al enlace': it.isAd ? normalizeInt(stats.clicks) : '',
-        'Costo Total': it.isAd ? normalizeInt(stats.leads) : '',
         'Cantidad de comentarios': comments.length,
         'Comentarios': comments.map(c => `${c.author}: ${c.text}`).join('\n'),
         'Creado por': it.createdBy || '',
@@ -669,6 +884,52 @@ function exportItemsToExcel(itemsToExport, filenameTag){
   }
 }
 
+function exportInterestedClientsToExcel(itemsToExport, filenameTag){
+  if(!Array.isArray(itemsToExport) || itemsToExport.length === 0) return false;
+  if(typeof XLSX === 'undefined'){
+    console.error('XLSX no está disponible; no se pudo generar el backup de contactos.');
+    return false;
+  }
+  try{
+    const rows = [];
+    itemsToExport.forEach(item => {
+      const clients = Array.isArray(item?.stats?.interestedClients) ? item.stats.interestedClients : [];
+      clients.forEach((client, index) => {
+        const flattened = {
+          'Fecha del contenido': item.date || '',
+          'Título del contenido': item.title || '',
+          'Nombre de campaña': item?.stats?.campaignName || '',
+          'Fuente': item?.stats?.resultType || '',
+          'Fila': index + 1,
+        };
+        Object.keys(client || {}).forEach(key => {
+          flattened[key] = client?.[key] ?? '';
+        });
+        rows.push(flattened);
+      });
+    });
+
+    if(rows.length === 0) return false;
+
+    const headers = Array.from(rows.reduce((set, row) => {
+      Object.keys(row).forEach(key => set.add(key));
+      return set;
+    }, new Set()));
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
+    styleExcelSheet(ws, headers);
+    XLSX.utils.book_append_sheet(wb, ws, 'Contactos');
+
+    const stamp = dateStr(today.getFullYear(), today.getMonth(), today.getDate());
+    XLSX.writeFile(wb, `sabium-contactos-${filenameTag}-${stamp}.xlsx`);
+    return true;
+  }catch(e){
+    console.error('Error generando el Excel de contactos', e);
+    return false;
+  }
+}
+
 function pruneOldItems(itemsList){
   if(!Array.isArray(itemsList) || itemsList.length < AUTO_PRUNE_TRIGGER_ITEMS) return {removed: 0, backedUp: false, backupFailed: false};
   const toRemove = itemsList.filter(it => isBeforeCurrentMonth(it?.date));
@@ -692,21 +953,146 @@ function formatNumber(value){
 }
 
 function formatMoney(value){
-  return `$ ${formatNumber(value)}`;
+  return `$ ${formatDecimalDisplay(value, 2)}`;
+}
+
+function getNormalizedStats(stats = {}){
+  const startDate = stats.startDate || stats.campaignStart || '';
+  const endDate = stats.endDate || stats.campaignEnd || '';
+  const impressions = normalizeInt(stats.impressions ?? stats.views);
+  const uniqueViewers = normalizeInt(stats.uniqueViewers);
+  const resultCount = normalizeInt(stats.resultCount ?? stats.whatsapp);
+  const linkClicks = normalizeInt(stats.linkClicks ?? stats.clicks);
+  const interactions = normalizeInt(stats.interactions);
+  const reactions = normalizeInt(stats.reactions);
+  const saves = normalizeInt(stats.saves);
+  const views3s = normalizeInt(stats.views3s);
+  const totalSpend = normalizeDecimal(stats.totalSpend ?? stats.leads);
+  const dailyBudget = normalizeDecimal(stats.dailyBudget);
+  const costPerResult = resultCount > 0 ? totalSpend / resultCount : normalizeDecimal(stats.costPerResult);
+  const durationDays = stats.durationDays || '';
+
+  return {
+    campaignName: stats.campaignName || '',
+    startDate,
+    endDate,
+    objective: stats.objective || '',
+    durationDays,
+    totalSpend,
+    dailyBudget,
+    resultType: stats.resultType || '',
+    resultCount,
+    costPerResult,
+    interestedClients: Array.isArray(stats.interestedClients) ? stats.interestedClients : [],
+    interestedClientsFileName: stats.interestedClientsFileName || '',
+    impressions,
+    uniqueViewers,
+    interactions,
+    reactions,
+    saves,
+    linkClicks,
+    videoDuration: stats.videoDuration || '',
+    views3s,
+    avgWatchTime: stats.avgWatchTime || '',
+    womenPct: normalizeDecimal(stats.womenPct),
+    menPct: normalizeDecimal(stats.menPct),
+    ageRange: stats.ageRange || '',
+    location: stats.location || '',
+    mainPlatform: stats.mainPlatform || '',
+  };
+}
+
+function statsFormSnapshot(){
+  return {
+    campaignName: $('statCampaignName').value.trim(),
+    startDate: $('statStartDate').value,
+    endDate: $('statEndDate').value,
+    objective: $('statObjective').value.trim(),
+    durationDays: $('statDurationDays').value.trim(),
+    totalSpend: normalizeDecimal($('statTotalSpend').value),
+    dailyBudget: normalizeDecimal($('statDailyBudget').value),
+    resultType: $('statResultType').value.trim(),
+    resultCount: normalizeInt($('statResultCount').value),
+    interestedClients: pendingInterestedClients,
+    interestedClientsFileName: pendingInterestedClientsFileName,
+    impressions: normalizeInt($('statImpressions').value),
+    uniqueViewers: normalizeInt($('statUniqueViewers').value),
+    interactions: normalizeInt($('statInteractions').value),
+    reactions: normalizeInt($('statReactions').value),
+    saves: normalizeInt($('statSaves').value),
+    linkClicks: normalizeInt($('statLinkClicks').value),
+    videoDuration: $('statVideoDuration').value.trim(),
+    views3s: normalizeInt($('statViews3s').value),
+    avgWatchTime: $('statAvgWatchTime').value.trim(),
+    womenPct: normalizeDecimal($('statWomenPct').value),
+    menPct: normalizeDecimal($('statMenPct').value),
+    ageRange: $('statAgeRange').value.trim(),
+    location: $('statLocation').value.trim(),
+    mainPlatform: $('statMainPlatform').value.trim(),
+  };
+}
+
+function refreshDerivedStatsFields(){
+  const totalSpend = normalizeDecimal($('statTotalSpend').value);
+  const resultCount = normalizeInt($('statResultCount').value);
+}
+
+function updateInterestedClientsSummary(count, fileName){
+  const summary = $('interestedClientsSummary');
+  if(!summary) return;
+  if(count > 0){
+    summary.textContent = `${count} fila${count === 1 ? '' : 's'} importada${count === 1 ? '' : 's'}${fileName ? ` · ${fileName}` : ''}`;
+  } else {
+    summary.textContent = 'Sin Excel cargado';
+  }
+}
+
+async function importInterestedClientsFromFile(file){
+  if(!file) return;
+  if(typeof XLSX === 'undefined'){
+    showToast('No se pudo leer el Excel porque la librería no está disponible.');
+    return;
+  }
+  try{
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const firstSheetName = workbook.SheetNames[0];
+    if(!firstSheetName){
+      showToast('El Excel no tiene hojas para importar.');
+      return;
+    }
+    const sheet = workbook.Sheets[firstSheetName];
+    const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    pendingInterestedClients = Array.isArray(rows) ? rows : [];
+    pendingInterestedClientsFileName = file.name || '';
+    updateInterestedClientsSummary(pendingInterestedClients.length, pendingInterestedClientsFileName);
+    refreshDerivedStatsFields();
+    showToast('Excel importado');
+  }catch(e){
+    console.error('Error importando Excel de clientes interesados', e);
+    showToast('No se pudo importar el Excel');
+  }
+}
+
+function setModalTab(tabName){
+  activeModalTab = tabName;
+  document.querySelectorAll('.modal-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.modalTab === tabName);
+  });
+  document.querySelectorAll('[data-pane]').forEach(pane => {
+    pane.classList.toggle('active', pane.dataset.pane === tabName);
+  });
 }
 
 function adPerformanceScore(item){
-  const stats = item.stats || {};
-  const views = normalizeInt(stats.views);
-  const whatsapp = normalizeInt(stats.whatsapp);
-  const clicks = normalizeInt(stats.clicks);
-  return Math.round((views * 0.2) + (whatsapp * 4) + (clicks * 3));
+  const stats = getNormalizedStats(item.stats || {}, item.title || '');
+  return Math.max(0, Math.round((stats.resultCount * 5) + (stats.linkClicks * 3) + (stats.interactions * 0.75) + (stats.impressions * 0.05) + (stats.uniqueViewers * 0.03) - (stats.totalSpend * 0.15)));
 }
 
 function getAdStats(){
   return items.filter(it => it.isAd).map(item => ({
     item,
-    stats: item.stats || {},
+    stats: getNormalizedStats(item.stats || {}, item.title || ''),
     score: adPerformanceScore(item),
   }));
 }
@@ -715,20 +1101,21 @@ function renderStatsView(){
   const ads = getAdStats();
   const totals = ads.reduce((acc, entry) => {
     acc.count += 1;
-    acc.views += normalizeInt(entry.stats.views);
-    acc.whatsapp += normalizeInt(entry.stats.whatsapp);
-    acc.clicks += normalizeInt(entry.stats.clicks);
-    acc.cost += normalizeInt(entry.stats.leads);
+    acc.spend += entry.stats.totalSpend;
+    acc.results += normalizeInt(entry.stats.resultCount);
+    acc.impressions += normalizeInt(entry.stats.impressions);
+    acc.clicks += normalizeInt(entry.stats.linkClicks);
+    acc.interactions += normalizeInt(entry.stats.interactions);
     acc.score += entry.score;
     return acc;
-  }, {count:0, views:0, whatsapp:0, clicks:0, cost:0, score:0});
+  }, {count:0, spend:0, results:0, impressions:0, clicks:0, interactions:0, score:0});
 
   const summaryCards = [
     {label:'Publicidades', value:totals.count, help:'Piezas marcadas como publicidad'},
-    {label:'Visualizaciones', value:totals.views, help:'Alcance acumulado'},
-    {label:'Consultas WhatsApp', value:totals.whatsapp, help:'Interacciones directas'},
+    {label:'Gasto total', value:formatMoney(totals.spend), help:'Suma de inversión cargada'},
+    {label:'Resultados', value:totals.results, help:'Cantidad total de conversiones'},
+    {label:'Impresiones', value:totals.impressions, help:'Visualizaciones acumuladas'},
     {label:'Clicks al enlace', value:totals.clicks, help:'Tráfico generado'},
-    {label:'Costo total', value:totals.cost ? formatMoney(totals.cost) : '$ 0', help:'Según lo cargado en cada pieza'},
   ];
 
   $('statsSummary').innerHTML = summaryCards.map(card => `
@@ -739,7 +1126,7 @@ function renderStatsView(){
     </div>
   `).join('');
 
-  const ranking = ads.sort((a, b)=> b.score - a.score || (b.stats.clicks||0) - (a.stats.clicks||0) || (b.stats.whatsapp||0) - (a.stats.whatsapp||0));
+  const ranking = ads.sort((a, b)=> b.score - a.score || (b.stats.linkClicks||0) - (a.stats.linkClicks||0) || (b.stats.resultCount||0) - (a.stats.resultCount||0));
   const rankingList = $('rankingList');
   const statsEmpty = $('statsEmpty');
 
@@ -778,14 +1165,13 @@ function renderStatsView(){
           <div class="rank-sub">
             <span>${platformLabel(entry.item.platform)}</span>
             <span>${escapeHtml(entry.item.date || '')}</span>
-            <span>Puntaje ${formatNumber(entry.score)}</span>
+            <span>${escapeHtml(stats.resultType || 'Sin tipo de resultado')}</span>
           </div>
         </div>
         <div class="rank-metrics">
-          <span class="metric-pill"><strong>${formatNumber(stats.views)}</strong> vistas</span>
-          <span class="metric-pill"><strong>${formatNumber(stats.whatsapp)}</strong> WhatsApp</span>
-          <span class="metric-pill"><strong>${formatNumber(stats.clicks)}</strong> clicks</span>
-          <span class="metric-pill"><strong>${formatMoney(stats.leads)}</strong> costo</span>
+          <span class="metric-pill"><strong>${formatMoney(stats.totalSpend)}</strong> gasto</span>
+          <span class="metric-pill"><strong>${formatNumber(stats.resultCount)}</strong> resultados</span>
+          <span class="metric-pill"><strong>${formatNumber(entry.score)}</strong> puntaje</span>
         </div>
       </div>
     `;
@@ -793,18 +1179,33 @@ function renderStatsView(){
 }
 
 function openStatsDetailModal(item){
-  const stats = item.stats || {};
+  const stats = getNormalizedStats(item.stats || {}, item.title || '');
   const detailItems = [
-    {label:'Título', value:item.title || '(sin título)', full:true},
-    {label:'Plataforma', value:platformLabel(item.platform)},
-    {label:'Fecha', value:item.date || '—'},
-    {label:'Estado', value:item.status || '—'},
-    {label:'Responsable', value:item.owner || '—'},
+    {label:'Nombre de campaña', value:stats.campaignName || '—', full:true},
+    {label:'Objetivo', value:stats.objective || '—'},
+    {label:'Fecha inicio', value:stats.startDate || '—'},
+    {label:'Fecha fin', value:stats.endDate || '—'},
+    {label:'Duración (días)', value:stats.durationDays || '—'},
+    {label:'Gasto total', value:formatMoney(stats.totalSpend)},
+    {label:'Presupuesto diario', value:formatMoney(stats.dailyBudget)},
+    {label:'Tipo de resultado', value:stats.resultType || '—'},
+    {label:'Cantidad de resultados', value:formatNumber(stats.resultCount)},
+    {label:'Costo por resultado', value:formatMoney(stats.costPerResult)},
+    {label:'Impresiones', value:formatNumber(stats.impressions)},
+    {label:'Alcance único', value:formatNumber(stats.uniqueViewers)},
+    {label:'Interacciones', value:formatNumber(stats.interactions)},
+    {label:'Reacciones', value:formatNumber(stats.reactions)},
+    {label:'Guardados', value:formatNumber(stats.saves)},
+    {label:'Clics en el enlace', value:formatNumber(stats.linkClicks)},
+    {label:'Duración del video', value:stats.videoDuration || '—'},
+    {label:'Reproducciones de 3 segundos', value:formatNumber(stats.views3s)},
+    {label:'Tiempo promedio de reproducción', value:stats.avgWatchTime || '—'},
+    {label:'% Mujeres', value:formatDecimalDisplay(stats.womenPct, 1)},
+    {label:'% Hombres', value:formatDecimalDisplay(stats.menPct, 1)},
+    {label:'Rango de edad', value:stats.ageRange || '—'},
+    {label:'Ubicación principal', value:stats.location || '—'},
+    {label:'Plataforma principal', value:stats.mainPlatform || '—'},
     {label:'Puntaje de rendimiento', value:formatNumber(adPerformanceScore(item))},
-    {label:'Visualizaciones', value:formatNumber(stats.views)},
-    {label:'Consultas WhatsApp', value:formatNumber(stats.whatsapp)},
-    {label:'Clicks al enlace', value:formatNumber(stats.clicks)},
-    {label:'Costo total', value:formatMoney(stats.leads)},
   ];
 
   $('statsDetailTitle').textContent = item.isAd ? 'Detalle de publicidad' : 'Detalle de contenido';
@@ -837,6 +1238,7 @@ function currentModalItem(){
 }
 
 function modalSnapshot(){
+  const stats = statsFormSnapshot();
   return {
     id: $('fieldId').value,
     date: $('fieldDate').value,
@@ -848,12 +1250,7 @@ function modalSnapshot(){
     canvaLink: $('fieldCanva').value.trim(),
     notes: $('fieldNotes').value.trim(),
     comments: currentModalItem()?.comments || [],
-    stats: {
-      views: normalizeInt($('statViews')?.value),
-      whatsapp: normalizeInt($('statWhatsapp')?.value),
-      clicks: normalizeInt($('statClicks')?.value),
-      leads: normalizeInt($('statLeads')?.value),
-    },
+    stats,
   };
 }
 
@@ -887,19 +1284,45 @@ function renderModalPreview(item){
 }
 
 function renderModalStats(item){
-  const stats = item.stats || {};
-  $('statViews').value = stats.views ?? '';
-  $('statWhatsapp').value = stats.whatsapp ?? '';
-  $('statClicks').value = stats.clicks ?? '';
-  $('statLeads').value = stats.leads ?? '';
-  $('statsFieldBlock').style.display = item.isAd ? 'block' : 'none';
+  const stats = getNormalizedStats(item.stats || {});
+  pendingInterestedClients = Array.isArray(stats.interestedClients) ? stats.interestedClients : [];
+  pendingInterestedClientsFileName = stats.interestedClientsFileName || '';
+  $('statCampaignName').value = stats.campaignName || '';
+  $('statStartDate').value = stats.startDate || '';
+  $('statEndDate').value = stats.endDate || '';
+  $('statObjective').value = stats.objective || '';
+  $('statDurationDays').value = stats.durationDays || '';
+  $('statTotalSpend').value = stats.totalSpend || '';
+  $('statDailyBudget').value = stats.dailyBudget || '';
+  $('statResultType').value = stats.resultType || '';
+  $('statResultCount').value = stats.resultCount || '';
+  $('statImpressions').value = stats.impressions || '';
+  $('statUniqueViewers').value = stats.uniqueViewers || '';
+  $('statInteractions').value = stats.interactions || '';
+  $('statReactions').value = stats.reactions || '';
+  $('statSaves').value = stats.saves || '';
+  $('statLinkClicks').value = stats.linkClicks || '';
+  $('statVideoDuration').value = stats.videoDuration || '';
+  $('statViews3s').value = stats.views3s || '';
+  $('statAvgWatchTime').value = stats.avgWatchTime || '';
+  $('statWomenPct').value = stats.womenPct || '';
+  $('statMenPct').value = stats.menPct || '';
+  $('statAgeRange').value = stats.ageRange || '';
+  $('statLocation').value = stats.location || '';
+  $('statMainPlatform').value = stats.mainPlatform || '';
+  updateInterestedClientsSummary(pendingInterestedClients.length, pendingInterestedClientsFileName);
+  $('statsEmptyState').style.display = item.isAd ? 'none' : 'block';
+  $('statsFieldsWrap').style.display = item.isAd ? 'block' : 'none';
+  refreshDerivedStatsFields();
 }
 
 function resetModalStats(){
-  $('statViews').value = '';
-  $('statWhatsapp').value = '';
-  $('statClicks').value = '';
-  $('statLeads').value = '';
+  pendingInterestedClients = [];
+  pendingInterestedClientsFileName = '';
+  updateInterestedClientsSummary(0, '');
+  ['statCampaignName','statStartDate','statEndDate','statObjective','statDurationDays','statTotalSpend','statDailyBudget','statResultType','statResultCount','statImpressions','statUniqueViewers','statInteractions','statReactions','statSaves','statLinkClicks','statVideoDuration','statViews3s','statAvgWatchTime','statWomenPct','statMenPct','statAgeRange','statLocation','statMainPlatform'].forEach(id => {
+    $(id).value = '';
+  });
 }
 
 /* ---------------- storage (Firestore, compartido para todos los dispositivos) ---------------- */
@@ -1107,6 +1530,7 @@ function openAddModal(ds){
   $('deleteBtn').style.display = 'none';
   $('commentsSection').style.display = 'block';
   setEditLocked(false);
+  setModalTab('content');
   renderModalPreview(modalSnapshot());
   renderModalStats(modalSnapshot());
   showOverlay('contentOverlay');
@@ -1129,6 +1553,7 @@ function openEditModal(it){
   renderModalPreview(it);
   renderModalStats(it);
   setEditLocked(true);
+  setModalTab('content');
   showOverlay('contentOverlay');
 }
 
@@ -1186,10 +1611,30 @@ $('backupBtn').addEventListener('click', ()=>{
   showToast(ok ? 'Backup en Excel descargado' : 'No se pudo generar el Excel');
 });
 
+$('downloadInterestedClientsBtn').addEventListener('click', ()=>{
+  const contactItems = items.filter(it => Array.isArray(it?.stats?.interestedClients) && it.stats.interestedClients.length > 0);
+  if(contactItems.length === 0){
+    showToast('No hay contactos importados todavía');
+    return;
+  }
+  const ok = exportInterestedClientsToExcel(contactItems, 'clientes-potenciales');
+  showToast(ok ? 'Excel de contactos descargado' : 'No se pudo generar el Excel de contactos');
+});
+
 $('openCanvaBtn').addEventListener('click', ()=>{
   const url = $('fieldCanva').value.trim();
   if(!url){ showToast('Pegá primero el link de Canva'); return; }
   window.open(url, '_blank', 'noopener,noreferrer');
+});
+
+$('importInterestedClientsBtn').addEventListener('click', ()=>{
+  $('importInterestedClientsInput').click();
+});
+
+$('importInterestedClientsInput').addEventListener('change', async (e)=>{
+  const file = e.target.files && e.target.files[0];
+  if(file) await importInterestedClientsFromFile(file);
+  e.target.value = '';
 });
 
 $('unlockEditBtn').addEventListener('click', ()=>{
@@ -1199,11 +1644,16 @@ $('unlockEditBtn').addEventListener('click', ()=>{
 $('cancelBtn').addEventListener('click', ()=> hideOverlay('contentOverlay'));
 $('contentOverlay').addEventListener('click', (e)=>{ if(e.target.id==='contentOverlay') hideOverlay('contentOverlay'); });
 
+document.querySelectorAll('.modal-tab').forEach(btn => {
+  btn.addEventListener('click', ()=> setModalTab(btn.dataset.modalTab));
+});
+
 $('saveBtn').addEventListener('click', async ()=>{
   const title = $('fieldTitle').value.trim();
   if(!title){ showToast('Poné un título para el contenido'); return; }
   const date = $('fieldDate').value;
   if(!date){ showToast('Elegí una fecha'); return; }
+  const stats = $('fieldIsAd').value === 'yes' ? statsFormSnapshot() : null;
   const payload = {
     date,
     platform: $('fieldPlatform').value,
@@ -1213,12 +1663,7 @@ $('saveBtn').addEventListener('click', async ()=>{
     owner: $('fieldOwner').value.trim(),
     canvaLink: $('fieldCanva').value.trim(),
     notes: $('fieldNotes').value.trim(),
-    stats: $('fieldIsAd').value === 'yes' ? {
-      views: normalizeInt($('statViews').value),
-      whatsapp: normalizeInt($('statWhatsapp').value),
-      clicks: normalizeInt($('statClicks').value),
-      leads: normalizeInt($('statLeads').value),
-    } : null,
+    stats,
   };
 
   if(currentEditId){
@@ -1267,14 +1712,11 @@ $('closeContentBtn').addEventListener('click', ()=> hideOverlay('contentOverlay'
 
 $('fieldIsAd').addEventListener('change', ()=>{
   if($('fieldIsAd').value === 'yes'){
-    const currentStats = modalSnapshot().stats || {};
-    if(!normalizeInt(currentStats.views) && !normalizeInt(currentStats.whatsapp) && !normalizeInt(currentStats.clicks) && !normalizeInt(currentStats.leads)){
-      resetModalStats();
-    }
+    renderModalStats(modalSnapshot());
   } else {
     resetModalStats();
+    renderModalStats(modalSnapshot());
   }
-  renderModalStats(modalSnapshot());
 });
 
 $('addCommentBtn').addEventListener('click', async ()=>{
@@ -1297,10 +1739,11 @@ $('addCommentBtn').addEventListener('click', async ()=>{
   }
 });
 
-['fieldIsAd','statViews','statWhatsapp','statClicks','statLeads'].forEach(id => {
-  $(id).addEventListener('change', ()=>{
-    const snapshot = modalSnapshot();
-    renderModalStats(snapshot);
+['fieldIsAd','statStartDate','statEndDate','statTotalSpend','statDailyBudget','statResultCount','statImpressions','statUniqueViewers','statLinkClicks','statViews3s'].forEach(id => {
+  ['input','change'].forEach(eventName => {
+    $(id).addEventListener(eventName, ()=>{
+      refreshDerivedStatsFields();
+    });
   });
 });
 
@@ -1398,7 +1841,7 @@ $('viewTabs').addEventListener('click', (e)=>{
 });
 
 $('bestAdCard').addEventListener('click', ()=>{
-  const best = getAdStats().sort((a, b)=> b.score - a.score || (b.stats.clicks||0) - (a.stats.clicks||0) || (b.stats.whatsapp||0) - (a.stats.whatsapp||0))[0];
+  const best = getAdStats().sort((a, b)=> b.score - a.score || (b.stats.linkClicks||0) - (a.stats.linkClicks||0) || (b.stats.resultCount||0) - (a.stats.resultCount||0))[0];
   if(best) openStatsDetailModal(best.item);
 });
 
